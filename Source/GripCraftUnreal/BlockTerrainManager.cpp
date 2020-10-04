@@ -41,6 +41,7 @@ void ABlockTerrainManager::UpdateChunks()
 
 	UE_LOG(LogTemp, Display, TEXT("New player chunk position: X:%d Y:%d"), PlayerChunkPosition.X, PlayerChunkPosition.Y);
 
+	RemoveFarChunks();
 	CreateNewChunks();
 }
 
@@ -62,10 +63,32 @@ void ABlockTerrainManager::CreateNewChunks()
 }
 
 
+void ABlockTerrainManager::RemoveFarChunks()
+{
+	TArray<FIntPoint> chunksToRemove;
+
+	for (const auto& pair : ActiveChunks)
+	{
+		FIntPoint chunkPosition = pair.Key;
+		FIntPoint diff = chunkPosition - PlayerChunkPosition;
+		if (FMath::Abs(diff.X) <= ChunkDistance && FMath::Abs(diff.Y) <= ChunkDistance)
+			continue;
+
+		chunksToRemove.Emplace(chunkPosition);
+	}
+
+	for (const FIntPoint& chunkToRemove : chunksToRemove)
+	{
+		ABlockTerrainChunk* chunk = ActiveChunks[chunkToRemove];
+
+		CachedChunks.Emplace(chunk);
+		ActiveChunks.Remove(chunkToRemove);
+	}
+}
+
+
 ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 {
-	UE_LOG(LogTemp, Display, TEXT("Create chunk: X:%d Y:%d"), chunkPos.X, chunkPos.Y);
-
 	int worldX = chunkPos.X * ChunkWidth;
 	int worldY = chunkPos.Y * ChunkWidth;
 
@@ -75,11 +98,27 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 		0
 	);
 
-	ABlockTerrainChunk* newChunk = GetWorld()->SpawnActor<ABlockTerrainChunk>(ChunkClassToSpawn, worldPos, FRotator::ZeroRotator);
-	newChunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + chunkPos.ToString());
+	ABlockTerrainChunk* newChunk;
+	if (CachedChunks.Num() > 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Recycle chunk: X:%d Y:%d"), chunkPos.X, chunkPos.Y);
 
-	newChunk->Initialize(ChunkWidth, ChunkHeight);
+		int lastIdx = CachedChunks.Num() - 1;
+		newChunk = CachedChunks[lastIdx];
+		CachedChunks.RemoveAt(lastIdx);
+
+		newChunk->SetActorLocation(worldPos);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Create chunk: X:%d Y:%d"), chunkPos.X, chunkPos.Y);
+
+		newChunk = GetWorld()->SpawnActor<ABlockTerrainChunk>(ChunkClassToSpawn, worldPos, FRotator::ZeroRotator);
+		newChunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+		newChunk->Initialize(ChunkWidth, ChunkHeight);
+	}
+
+	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + chunkPos.ToString());	
 	newChunk->GenerateHeightmap(worldX, worldY, NoiseScale, NoiseOffset, NoiseLib);
 	newChunk->UpdateMesh();
 

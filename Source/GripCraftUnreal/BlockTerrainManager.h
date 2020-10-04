@@ -61,11 +61,15 @@ private:
 	UPROPERTY()
 	TMap<FIntPoint, class ABlockTerrainChunk*> ActiveChunks;
 
+	UPROPERTY()
+	TArray<class ABlockTerrainChunk*> CachedChunks;
+
 	FastNoiseLite NoiseLib;
 	FIntPoint PlayerChunkPosition = FIntPoint(INT_MIN, INT_MIN);
 
 	void UpdateChunks();
 	void CreateNewChunks();
+	void RemoveFarChunks();
 	class ABlockTerrainChunk* CreateChunk(FIntPoint chunkPos);
 	FIntPoint GetChunkPosition(FVector position) const;
 
