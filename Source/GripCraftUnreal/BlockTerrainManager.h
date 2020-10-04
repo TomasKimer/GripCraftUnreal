@@ -32,7 +32,7 @@ private:
 	int ChunkDistance = 5;
 
 	UPROPERTY(EditAnywhere)
-	float PerlinScale = 1.f; //0.02945f;
+	float PerlinScale = 2.945f; //0.02945f;
 
 	UPROPERTY(EditAnywhere)
 	FVector2D PerlinOffset = FVector2D(73.73f, 6562.0f);
