@@ -10,11 +10,7 @@ public:
 		this->SizeY = SizeY;
 		this->SizeZ = SizeZ;
 
-		const int count = Count();
-		
-		Array = new T[count];
-
-		memset(Array, 0, count * sizeof(T));
+		Array = new T[Count()];
 	}
 
 	~TArray3D()
@@ -27,6 +23,11 @@ public:
 		int flatIndex = FlattenIndex(X, Y, Z);
 
 		return Array[flatIndex];
+	}
+
+	void ClearData()
+	{
+		memset(Array, 0, Count() * sizeof(T));
 	}
 
 private:

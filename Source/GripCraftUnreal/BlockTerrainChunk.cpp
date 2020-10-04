@@ -7,15 +7,11 @@
 #include "FastNoiseLite.h"
 #include "BlockSettings.h"
 
+
 ABlockTerrainChunk::ABlockTerrainChunk()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// any of following returns null, why?
-//	ProceduralMeshComp = Cast<UProceduralMeshComponent>(GetComponentByClass(UProceduralMeshComponent::StaticClass()));
-//	ProceduralMeshComp = FindComponentByClass<UProceduralMeshComponent>()
-
-	// used this instead
 	ProceduralMeshComponent = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProceduralMeshComponent"));
 	RootComponent = ProceduralMeshComponent;
 }
@@ -44,9 +40,9 @@ void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale,
 		{
 			int height = GetTerrainHeight(PosX + x, PosY + y, NoiseScale, NoiseOffset, NoiseLib);
 
-			for (int z = 0; z < height; ++z)
+			for (int z = 0; z < Height; ++z)
 			{
-				BlockData->Get(x, y, z) = true;
+				BlockData->Get(x, y, z) = GetBlockTypeForHeight(z, height);
 			}
 		}
 	}
@@ -152,7 +148,7 @@ int ABlockTerrainChunk::GetTerrainHeight(int X, int Y, float NoiseScale, FVector
 	float noiseCoordY = Y * NoiseScale + NoiseOffset.Y;
 	float noiseSample = (NoiseLib.GetNoise(noiseCoordX, noiseCoordY) + 1.f) * 0.5f;
 
-	int result = FMath::Clamp(FMath::FloorToInt(noiseSample * Height), 1, Height - 1);
+	int result = FMath::Clamp(FMath::FloorToInt(noiseSample * Height), 0, Height - 1);
 
 //	UE_LOG(LogTemp, Display, TEXT("X:%f Y:%f Sample:%f Result:%d"), noiseCoordX, noiseCoordY, noiseSample, result);
 
