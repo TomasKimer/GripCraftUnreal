@@ -14,36 +14,30 @@ class GRIPCRAFTUNREAL_API ABlockTerrainChunk final : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ABlockTerrainChunk();
-	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	~ABlockTerrainChunk();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	void Initialize(int width, int height, float perlinScale, FVector2D perlinOffset);
+	void GenerateHeightmap(int PosX, int PosY);
+	void UpdateMesh() const;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly)
-	class UProceduralMeshComponent* ProceduralMeshComp;
+	class UProceduralMeshComponent* ProceduralMeshComponent;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	class UMaterialInterface* Material;
-	
+
 	FastNoiseLite NoiseLib;
-	int Width = 16;
-	int Height = 32;
-	float PerlinScale = 1.f; //0.02945f;
-	FVector2D PerlinOffset = FVector2D(73.73f, 6562.0f);
+	int Width, Height;
+	float PerlinScale;
+	FVector2D PerlinOffset;
 	TArray3D<bool>* BlockData;
 
-	void GenerateHeightmap(int PosX, int PosY);
-	void UpdateMesh() const;
 	int GetTerrainHeight(int X, int Y);	
 	bool GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) const;
 	bool IsNone(int X, int Y, int Z) const;
-	bool CheckBounds(int X, int Y, int Z) const;	
+	bool CheckBounds(int X, int Y, int Z) const;
 	void CreateTestCube() const;
 
 	static void AddFaceVertices(TArray<FVector>& Vertices, const FVector& Origin, const TArray<FVector>& VerticesToAdd);

@@ -3,6 +3,8 @@
 class BlockSettings
 {
 public:
+    static const int BLOCK_SIZE = 100; // centimetres
+
     static const TArray<FVector> LEFT_VERTICES;
     static const TArray<FVector> RIGHT_VERTICES;
     static const TArray<FVector> FRONT_VERTICES;

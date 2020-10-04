@@ -6,10 +6,8 @@
 #include "KismetProceduralMeshLibrary.h"
 #include "BlockSettings.h"
 
-// Sets default values
 ABlockTerrainChunk::ABlockTerrainChunk()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	// any of following returns null, why?
@@ -17,29 +15,29 @@ ABlockTerrainChunk::ABlockTerrainChunk()
 //	ProceduralMeshComp = FindComponentByClass<UProceduralMeshComponent>()
 
 	// used this instead
-	ProceduralMeshComp = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProcMeshComp"));
-	check(ProceduralMeshComp != nullptr);
+	ProceduralMeshComponent = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProceduralMeshComponent"));
+	RootComponent = ProceduralMeshComponent;
 
 	NoiseLib.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+}
+
+
+ABlockTerrainChunk::~ABlockTerrainChunk()
+{
+	delete BlockData;
+}
+
+
+void ABlockTerrainChunk::Initialize(int width, int height, float perlinScale, FVector2D perlinOffset)
+{
+	Width = width;
+	Height = height;
+	PerlinScale = perlinScale;
+	PerlinOffset = perlinOffset;
 
 	BlockData = new TArray3D<bool>(Width, Width, Height);
 }
 
-// Called when the game starts or when spawned
-void ABlockTerrainChunk::BeginPlay()
-{
-	Super::BeginPlay();
-
-	GenerateHeightmap(0, 0);
-	UpdateMesh();
-	//CreateTestCube();
-}
-
-// Called every frame
-void ABlockTerrainChunk::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
 
 void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY)
 {
@@ -56,6 +54,7 @@ void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY)
 		}
 	}
 }
+
 
 void ABlockTerrainChunk::UpdateMesh() const
 {
@@ -141,25 +140,27 @@ void ABlockTerrainChunk::UpdateMesh() const
 	TArray<FProcMeshTangent> tangents;
 	TArray<FLinearColor> vertexColors;
 
-	// TODO looks weird, something must be wrong here
+	// TODO looks weird, something must be wrong here (and is way toooo slow)
 //	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, uvs, normals, tangents);
 
-	ProceduralMeshComp->CreateMeshSection_LinearColor(0, vertices, triangles, normals, uvs, vertexColors, tangents, true);
-	ProceduralMeshComp->SetMaterial(0, Material);
+	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, vertices, triangles, normals, uvs, vertexColors, tangents, true);
+	ProceduralMeshComponent->SetMaterial(0, Material);
 }
+
 
 int ABlockTerrainChunk::GetTerrainHeight(int X, int Y)
 {
 	float perlinCoordX = X * PerlinScale + PerlinOffset.X;
 	float perlinCoordY = Y * PerlinScale + PerlinOffset.Y;
-	float perlinSample = NoiseLib.GetNoise(perlinCoordX, perlinCoordY);
+	float perlinSample = (NoiseLib.GetNoise(perlinCoordX, perlinCoordY) + 1.f) * 0.5f;
 
 	int result = FMath::Clamp(FMath::FloorToInt(perlinSample * Height), 0, Height - 1);
-	
+
 //	UE_LOG(LogTemp, Display, TEXT("X:%f Y:%f Sample:%f Result:%d"), perlinCoordX, perlinCoordY, perlinSample, result);
-	
+
 	return result;
 }
+
 
 bool ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) const
 {
@@ -178,15 +179,15 @@ bool ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) 
 	return true; // snow
 }
 
+
 void ABlockTerrainChunk::AddFaceVertices(TArray<FVector>& Vertices, const FVector& Origin, const TArray<FVector>& VerticesToAdd)
 {
-	const int CUBE_SIZE_IN_CM = 100;
-	
 	for (int idx = 0; idx < VerticesToAdd.Num(); ++idx)
 	{
-		Vertices.Add((Origin + VerticesToAdd[idx]) * CUBE_SIZE_IN_CM);
+		Vertices.Add((Origin + VerticesToAdd[idx]) * BlockSettings::BLOCK_SIZE);
 	}
 }
+
 
 bool ABlockTerrainChunk::IsNone(int X, int Y, int Z) const
 {
@@ -195,6 +196,7 @@ bool ABlockTerrainChunk::IsNone(int X, int Y, int Z) const
 	
 	return BlockData->Get(X, Y, Z) == false;
 }
+
 
 bool ABlockTerrainChunk::CheckBounds(int X, int Y, int Z) const
 {
@@ -206,6 +208,7 @@ bool ABlockTerrainChunk::CheckBounds(int X, int Y, int Z) const
 	return true;
 }
 
+
 void ABlockTerrainChunk::CreateTestCube() const
 {
 	const int   FACE_COUNT        = 6;
@@ -213,7 +216,6 @@ void ABlockTerrainChunk::CreateTestCube() const
 	const int   VERTICES_PER_FACE = 4;
 	const int   VERTEX_COUNT      = FACE_COUNT * VERTICES_PER_FACE;
 	const int   INDEX_COUNT       = FACE_COUNT * INDICES_PER_FACE;
-	const int   CUBE_SIZE_IN_CM   = 100;
 
 	TArray<FVector> vertices;
 	vertices.Reserve(VERTEX_COUNT);
@@ -227,12 +229,12 @@ void ABlockTerrainChunk::CreateTestCube() const
 
 	for (FVector& v : vertices)
 	{
-		v *= CUBE_SIZE_IN_CM;
+		v *= BlockSettings::BLOCK_SIZE;
 	}
 
 	TArray<int32> triangles;
 	triangles.Reserve(INDEX_COUNT);
-	
+
 	for (int i = 0; i < FACE_COUNT; ++i)
 	{
 		int32 idx = i * VERTICES_PER_FACE;
@@ -245,7 +247,7 @@ void ABlockTerrainChunk::CreateTestCube() const
 		triangles.Add(idx + 2);
 		triangles.Add(idx + 3);
 	}
-	
+
 	TArray<FVector2D> uvs;
 	uvs.Append(BlockSettings::TEST_UVS); //side
 	uvs.Append(BlockSettings::TEST_UVS); //side
@@ -253,13 +255,13 @@ void ABlockTerrainChunk::CreateTestCube() const
 	uvs.Append(BlockSettings::TEST_UVS); //side
 	uvs.Append(BlockSettings::TEST_UVS); //top
 	uvs.Append(BlockSettings::TEST_UVS); //bottom
-	
+
 	TArray<FVector> normals;
 	TArray<FProcMeshTangent> tangents;
 	TArray<FLinearColor> vertexColors;
 
 	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, uvs, normals, tangents);
 
-	ProceduralMeshComp->CreateMeshSection_LinearColor(0, vertices, triangles, normals, uvs, vertexColors, tangents, true);
-	ProceduralMeshComp->SetMaterial(0, Material);
+	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, vertices, triangles, normals, uvs, vertexColors, tangents, true);
+	ProceduralMeshComponent->SetMaterial(0, Material);
 }
