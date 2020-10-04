@@ -4,6 +4,7 @@
 #include "BlockTerrainChunk.h"
 #include "ProceduralMeshComponent.h"
 #include "KismetProceduralMeshLibrary.h"
+#include "FastNoiseLite.h"
 #include "BlockSettings.h"
 
 ABlockTerrainChunk::ABlockTerrainChunk()
@@ -17,8 +18,6 @@ ABlockTerrainChunk::ABlockTerrainChunk()
 	// used this instead
 	ProceduralMeshComponent = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProceduralMeshComponent"));
 	RootComponent = ProceduralMeshComponent;
-
-	NoiseLib.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 }
 
 
@@ -28,24 +27,22 @@ ABlockTerrainChunk::~ABlockTerrainChunk()
 }
 
 
-void ABlockTerrainChunk::Initialize(int width, int height, float perlinScale, FVector2D perlinOffset)
+void ABlockTerrainChunk::Initialize(int width, int height)
 {
 	Width = width;
 	Height = height;
-	PerlinScale = perlinScale;
-	PerlinOffset = perlinOffset;
 
 	BlockData = new TArray3D<bool>(Width, Width, Height);
 }
 
 
-void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY)
+void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib)
 {
 	for (int x = 0; x < Width; ++x)
 	{
 		for (int y = 0; y < Width; ++y)
 		{
-			int height = GetTerrainHeight(PosX + x, PosY + y);
+			int height = GetTerrainHeight(PosX + x, PosY + y, NoiseScale, NoiseOffset, NoiseLib);
 
 			for (int z = 0; z < height; ++z)
 			{
@@ -143,20 +140,21 @@ void ABlockTerrainChunk::UpdateMesh() const
 	// TODO looks weird, something must be wrong here (and is way toooo slow)
 //	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, uvs, normals, tangents);
 
+	ProceduralMeshComponent->ClearMeshSection(0);
 	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, vertices, triangles, normals, uvs, vertexColors, tangents, true);
 	ProceduralMeshComponent->SetMaterial(0, Material);
 }
 
 
-int ABlockTerrainChunk::GetTerrainHeight(int X, int Y)
+int ABlockTerrainChunk::GetTerrainHeight(int X, int Y, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
 {
-	float perlinCoordX = X * PerlinScale + PerlinOffset.X;
-	float perlinCoordY = Y * PerlinScale + PerlinOffset.Y;
-	float perlinSample = (NoiseLib.GetNoise(perlinCoordX, perlinCoordY) + 1.f) * 0.5f;
+	float noiseCoordX = X * NoiseScale + NoiseOffset.X;
+	float noiseCoordY = Y * NoiseScale + NoiseOffset.Y;
+	float noiseSample = (NoiseLib.GetNoise(noiseCoordX, noiseCoordY) + 1.f) * 0.5f;
 
-	int result = FMath::Clamp(FMath::FloorToInt(perlinSample * Height), 0, Height - 1);
+	int result = FMath::Clamp(FMath::FloorToInt(noiseSample * Height), 1, Height - 1);
 
-//	UE_LOG(LogTemp, Display, TEXT("X:%f Y:%f Sample:%f Result:%d"), perlinCoordX, perlinCoordY, perlinSample, result);
+//	UE_LOG(LogTemp, Display, TEXT("X:%f Y:%f Sample:%f Result:%d"), noiseCoordX, noiseCoordY, noiseSample, result);
 
 	return result;
 }

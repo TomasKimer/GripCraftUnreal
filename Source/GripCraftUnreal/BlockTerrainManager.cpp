@@ -16,6 +16,8 @@ ABlockTerrainManager::ABlockTerrainManager()
 void ABlockTerrainManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	NoiseLib.SetNoiseType(ConvertNoiseType(NoiseType));
 }
 
 
@@ -77,8 +79,8 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 	newChunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + chunkPos.ToString());
 
-	newChunk->Initialize(ChunkWidth, ChunkHeight, PerlinScale, PerlinOffset);
-	newChunk->GenerateHeightmap(worldX, worldY);
+	newChunk->Initialize(ChunkWidth, ChunkHeight);
+	newChunk->GenerateHeightmap(worldX, worldY, NoiseScale, NoiseOffset, NoiseLib);
 	newChunk->UpdateMesh();
 
 	return newChunk;
@@ -91,4 +93,19 @@ FIntPoint ABlockTerrainManager::GetChunkPosition(FVector position) const
 		FMath::FloorToInt(position.X / (ChunkWidth * BlockSettings::BLOCK_SIZE)),
 		FMath::FloorToInt(position.Y / (ChunkWidth * BlockSettings::BLOCK_SIZE))
 	);
+}
+
+
+FastNoiseLite::NoiseType ABlockTerrainManager::ConvertNoiseType(ENoiseType NoiseType)
+{
+	switch (NoiseType)
+	{
+	case ENoiseType::OpenSimplex2:  return FastNoiseLite::NoiseType_OpenSimplex2;
+	case ENoiseType::OpenSimplex2S: return FastNoiseLite::NoiseType_OpenSimplex2S;
+	case ENoiseType::Cellular:      return FastNoiseLite::NoiseType_Cellular;
+	case ENoiseType::Perlin:        return FastNoiseLite::NoiseType_Perlin;
+	case ENoiseType::ValueCubic:    return FastNoiseLite::NoiseType_ValueCubic;
+	case ENoiseType::Value:         return FastNoiseLite::NoiseType_Value;
+	default: checkNoEntry();        return FastNoiseLite::NoiseType_Perlin;
+	}
 }

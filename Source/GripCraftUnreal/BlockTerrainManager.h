@@ -6,7 +6,21 @@
 
 #include "BlockTerrainChunk.h"
 #include "GameFramework/Actor.h"
+#include "FastNoiseLite.h"
 #include "BlockTerrainManager.generated.h"
+
+
+UENUM()
+enum class ENoiseType : uint8
+{
+	OpenSimplex2,
+	OpenSimplex2S,
+	Cellular,
+	Perlin,
+	ValueCubic,
+	Value
+};
+
 
 UCLASS()
 class GRIPCRAFTUNREAL_API ABlockTerrainManager final : public AActor
@@ -32,10 +46,13 @@ private:
 	int ChunkDistance = 5;
 
 	UPROPERTY(EditAnywhere)
-	float PerlinScale = 2.945f; //0.02945f;
+	ENoiseType NoiseType = ENoiseType::Perlin;
 
 	UPROPERTY(EditAnywhere)
-	FVector2D PerlinOffset = FVector2D(73.73f, 6562.0f);
+	float NoiseScale = 2.945f; //0.02945f;
+
+	UPROPERTY(EditAnywhere)
+	FVector2D NoiseOffset = FVector2D(73.73f, 6562.0f);
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -44,10 +61,13 @@ private:
 	UPROPERTY()
 	TMap<FIntPoint, class ABlockTerrainChunk*> ActiveChunks;
 
+	FastNoiseLite NoiseLib;
 	FIntPoint PlayerChunkPosition = FIntPoint(INT_MIN, INT_MIN);
 
 	void UpdateChunks();
 	void CreateNewChunks();
 	class ABlockTerrainChunk* CreateChunk(FIntPoint chunkPos);
 	FIntPoint GetChunkPosition(FVector position) const;
+
+	static FastNoiseLite::NoiseType ConvertNoiseType(ENoiseType NoiseType);
 };

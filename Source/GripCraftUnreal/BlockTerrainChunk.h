@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "FastNoiseLite.h"
 #include "Array3D.h"
 #include "BlockTerrainChunk.generated.h"
 
@@ -17,8 +16,8 @@ public:
 	ABlockTerrainChunk();
 	~ABlockTerrainChunk();
 
-	void Initialize(int width, int height, float perlinScale, FVector2D perlinOffset);
-	void GenerateHeightmap(int PosX, int PosY);
+	void Initialize(int width, int height);
+	void GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, class FastNoiseLite& NoiseLib);
 	void UpdateMesh() const;
 
 private:
@@ -28,13 +27,10 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	class UMaterialInterface* Material;
 
-	FastNoiseLite NoiseLib;
 	int Width, Height;
-	float PerlinScale;
-	FVector2D PerlinOffset;
 	TArray3D<bool>* BlockData;
 
-	int GetTerrainHeight(int X, int Y);	
+	int GetTerrainHeight(int X, int Y, float NoiseScale, FVector2D NoiseOffset, class FastNoiseLite& NoiseLib) const;
 	bool GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) const;
 	bool IsNone(int X, int Y, int Z) const;
 	bool CheckBounds(int X, int Y, int Z) const;
