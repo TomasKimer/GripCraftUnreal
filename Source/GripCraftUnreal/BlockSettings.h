@@ -1,17 +1,30 @@
-﻿#pragma once
+// Fill out your copyright notice in the Description page of Project Settings.
 
-class BlockSettings
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Engine/DataAsset.h"
+#include "BlockSettings.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class GRIPCRAFTUNREAL_API UBlockSettings : public UDataAsset
 {
+	GENERATED_BODY()
+
 public:
-    static const int BLOCK_SIZE = 100; // centimetres
+	static const TArray<FVector> LEFT_VERTICES;
+	static const TArray<FVector> RIGHT_VERTICES;
+	static const TArray<FVector> FRONT_VERTICES;
+	static const TArray<FVector> BACK_VERTICES;
+	static const TArray<FVector> TOP_VERTICES;
+	static const TArray<FVector> BOTTOM_VERTICES;
 
-    static const TArray<FVector> LEFT_VERTICES;
-    static const TArray<FVector> RIGHT_VERTICES;
-    static const TArray<FVector> FRONT_VERTICES;
-    static const TArray<FVector> BACK_VERTICES;
-    static const TArray<FVector> TOP_VERTICES;
-    static const TArray<FVector> BOTTOM_VERTICES;
+	static const float TILE_SIZE;
+	static const TArray<FVector2D> TEST_UVS;
 
-    static const float TILE_SIZE;
-    static const TArray<FVector2D> TEST_UVS;
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "1000"))
+	int BlockSize = 100; // centimetres
 };

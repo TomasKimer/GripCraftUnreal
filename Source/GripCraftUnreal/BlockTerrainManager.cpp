@@ -2,7 +2,6 @@
 
 
 #include "BlockTerrainManager.h"
-
 #include "BlockSettings.h"
 #include "BlockTerrainChunk.h"
 
@@ -93,8 +92,8 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 	int worldY = chunkPos.Y * ChunkWidth;
 
 	FVector worldPos(
-		worldX * BlockSettings::BLOCK_SIZE,
-		worldY * BlockSettings::BLOCK_SIZE,
+		worldX * BlockSettings->BlockSize,
+		worldY * BlockSettings->BlockSize,
 		0
 	);
 
@@ -115,7 +114,7 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 
 		newChunk = GetWorld()->SpawnActor<ABlockTerrainChunk>(ChunkClassToSpawn, worldPos, FRotator::ZeroRotator);
 		newChunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-		newChunk->Initialize(ChunkWidth, ChunkHeight);
+		newChunk->Initialize(ChunkWidth, ChunkHeight, BlockSettings);
 	}
 
 	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + chunkPos.ToString());	
@@ -129,8 +128,8 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 FIntPoint ABlockTerrainManager::GetChunkPosition(FVector position) const
 {
 	return FIntPoint(
-		FMath::FloorToInt(position.X / (ChunkWidth * BlockSettings::BLOCK_SIZE)),
-		FMath::FloorToInt(position.Y / (ChunkWidth * BlockSettings::BLOCK_SIZE))
+		FMath::FloorToInt(position.X / (ChunkWidth * BlockSettings->BlockSize)),
+		FMath::FloorToInt(position.Y / (ChunkWidth * BlockSettings->BlockSize))
 	);
 }
 

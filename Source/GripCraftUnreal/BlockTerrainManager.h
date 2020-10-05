@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 
+
+#include "BlockSettings.h"
 #include "BlockTerrainChunk.h"
 #include "GameFramework/Actor.h"
 #include "FastNoiseLite.h"
@@ -57,6 +59,9 @@ private:
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABlockTerrainChunk> ChunkClassToSpawn;
+
+	UPROPERTY(EditDefaultsOnly)
+	UBlockSettings* BlockSettings;
 
 	UPROPERTY()
 	TMap<FIntPoint, class ABlockTerrainChunk*> ActiveChunks;

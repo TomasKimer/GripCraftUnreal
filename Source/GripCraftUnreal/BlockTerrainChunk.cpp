@@ -23,16 +23,17 @@ ABlockTerrainChunk::~ABlockTerrainChunk()
 }
 
 
-void ABlockTerrainChunk::Initialize(int width, int height)
+void ABlockTerrainChunk::Initialize(int width, int height, UBlockSettings* blockSettings)
 {
 	Width = width;
 	Height = height;
+	BlockSettings = blockSettings;
 
 	BlockData = new TArray3D<bool>(Width, Width, Height);
 }
 
 
-void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib)
+void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
 {
 	for (int x = 0; x < Width; ++x)
 	{
@@ -72,43 +73,43 @@ void ABlockTerrainChunk::UpdateMesh() const
 
 				if (IsNone(x - 1, y, z))
 				{
-					AddFaceVertices(vertices, pos, BlockSettings::LEFT_VERTICES);
-					uvs.Append(BlockSettings::TEST_UVS);
+					AddFaceVertices(vertices, pos, UBlockSettings::LEFT_VERTICES);
+					uvs.Append(UBlockSettings::TEST_UVS);
 					faceCount += 1;
 				}
 
 				if (IsNone(x + 1, y, z))
 				{
-					AddFaceVertices(vertices, pos, BlockSettings::RIGHT_VERTICES);
-					uvs.Append(BlockSettings::TEST_UVS);
+					AddFaceVertices(vertices, pos, UBlockSettings::RIGHT_VERTICES);
+					uvs.Append(UBlockSettings::TEST_UVS);
 					faceCount += 1;
 				}
 
 				if (IsNone(x, y, z - 1))
 				{
-					AddFaceVertices(vertices, pos, BlockSettings::BOTTOM_VERTICES);
-					uvs.Append(BlockSettings::TEST_UVS);
+					AddFaceVertices(vertices, pos, UBlockSettings::BOTTOM_VERTICES);
+					uvs.Append(UBlockSettings::TEST_UVS);
 					faceCount += 1;
 				}
 
 				if (IsNone(x, y, z + 1))
 				{
-					AddFaceVertices(vertices, pos, BlockSettings::TOP_VERTICES);
-					uvs.Append(BlockSettings::TEST_UVS);
+					AddFaceVertices(vertices, pos, UBlockSettings::TOP_VERTICES);
+					uvs.Append(UBlockSettings::TEST_UVS);
 					faceCount += 1;
 				}
 
 				if (IsNone(x, y + 1, z))
 				{
-					AddFaceVertices(vertices, pos, BlockSettings::BACK_VERTICES);
-					uvs.Append(BlockSettings::TEST_UVS);
+					AddFaceVertices(vertices, pos, UBlockSettings::BACK_VERTICES);
+					uvs.Append(UBlockSettings::TEST_UVS);
 					faceCount += 1;
 				}
 
 				if (IsNone(x, y - 1, z))
 				{
-					AddFaceVertices(vertices, pos, BlockSettings::FRONT_VERTICES);
-					uvs.Append(BlockSettings::TEST_UVS);
+					AddFaceVertices(vertices, pos, UBlockSettings::FRONT_VERTICES);
+					uvs.Append(UBlockSettings::TEST_UVS);
 					faceCount += 1;
 				}
 
@@ -174,11 +175,11 @@ bool ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) 
 }
 
 
-void ABlockTerrainChunk::AddFaceVertices(TArray<FVector>& Vertices, const FVector& Origin, const TArray<FVector>& VerticesToAdd)
+void ABlockTerrainChunk::AddFaceVertices(TArray<FVector>& Vertices, const FVector& Origin, const TArray<FVector>& VerticesToAdd) const
 {
 	for (int idx = 0; idx < VerticesToAdd.Num(); ++idx)
 	{
-		Vertices.Add((Origin + VerticesToAdd[idx]) * BlockSettings::BLOCK_SIZE);
+		Vertices.Add((Origin + VerticesToAdd[idx]) * BlockSettings->BlockSize);
 	}
 }
 
@@ -214,16 +215,16 @@ void ABlockTerrainChunk::CreateTestCube() const
 	TArray<FVector> vertices;
 	vertices.Reserve(VERTEX_COUNT);
 
-	vertices.Append(BlockSettings::LEFT_VERTICES);
-	vertices.Append(BlockSettings::RIGHT_VERTICES);
-	vertices.Append(BlockSettings::FRONT_VERTICES);
-	vertices.Append(BlockSettings::BACK_VERTICES);
-	vertices.Append(BlockSettings::TOP_VERTICES);
-	vertices.Append(BlockSettings::BOTTOM_VERTICES);
+	vertices.Append(UBlockSettings::LEFT_VERTICES);
+	vertices.Append(UBlockSettings::RIGHT_VERTICES);
+	vertices.Append(UBlockSettings::FRONT_VERTICES);
+	vertices.Append(UBlockSettings::BACK_VERTICES);
+	vertices.Append(UBlockSettings::TOP_VERTICES);
+	vertices.Append(UBlockSettings::BOTTOM_VERTICES);
 
 	for (FVector& v : vertices)
 	{
-		v *= BlockSettings::BLOCK_SIZE;
+		v *= BlockSettings->BlockSize;
 	}
 
 	TArray<int32> triangles;
@@ -243,12 +244,12 @@ void ABlockTerrainChunk::CreateTestCube() const
 	}
 
 	TArray<FVector2D> uvs;
-	uvs.Append(BlockSettings::TEST_UVS); //side
-	uvs.Append(BlockSettings::TEST_UVS); //side
-	uvs.Append(BlockSettings::TEST_UVS); //side
-	uvs.Append(BlockSettings::TEST_UVS); //side
-	uvs.Append(BlockSettings::TEST_UVS); //top
-	uvs.Append(BlockSettings::TEST_UVS); //bottom
+	uvs.Append(UBlockSettings::TEST_UVS); //side
+	uvs.Append(UBlockSettings::TEST_UVS); //side
+	uvs.Append(UBlockSettings::TEST_UVS); //side
+	uvs.Append(UBlockSettings::TEST_UVS); //side
+	uvs.Append(UBlockSettings::TEST_UVS); //top
+	uvs.Append(UBlockSettings::TEST_UVS); //bottom
 
 	TArray<FVector> normals;
 	TArray<FProcMeshTangent> tangents;
