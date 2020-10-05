@@ -28,6 +28,16 @@ void ABlockTerrainManager::Tick(float DeltaTime)
 }
 
 
+FVector ABlockTerrainManager::GetOptimalPlayerSpawnLocation() const
+{
+	return FVector(
+		ChunkWidth * BlockSettings->BlockSize / 2.0f,
+		ChunkWidth * BlockSettings->BlockSize / 2.0f,
+		(ChunkHeight + 1) * BlockSettings->BlockSize
+	);
+}
+
+
 void ABlockTerrainManager::UpdateChunks()
 {
 	FVector   playerPosition      = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation(); // SP only, but it's enough for now
@@ -117,7 +127,7 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 		newChunk->Initialize(ChunkWidth, ChunkHeight, BlockSettings);
 	}
 
-	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + chunkPos.ToString());	
+	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + chunkPos.ToString());
 	newChunk->GenerateHeightmap(worldX, worldY, NoiseScale, NoiseOffset, NoiseLib);
 	newChunk->UpdateMesh();
 

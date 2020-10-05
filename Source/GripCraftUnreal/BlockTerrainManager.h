@@ -34,6 +34,8 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	FVector GetOptimalPlayerSpawnLocation() const;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -56,7 +58,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	FVector2D NoiseOffset = FVector2D(73.73f, 6562.0f);
 
-private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ABlockTerrainChunk> ChunkClassToSpawn;
 

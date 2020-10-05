@@ -13,6 +13,8 @@ class AGripCraftUnrealGameMode : public AGameModeBase
 
 public:
 	AGripCraftUnrealGameMode();
+
+	virtual void StartPlay() override;
 };
 
 

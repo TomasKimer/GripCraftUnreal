@@ -6,9 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "BlockSettings.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class GRIPCRAFTUNREAL_API UBlockSettings : public UDataAsset
 {
@@ -25,6 +23,6 @@ public:
 	static const float TILE_SIZE;
 	static const TArray<FVector2D> TEST_UVS;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", ClampMax = "1000"))
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "10", ClampMax = "1000"))
 	int BlockSize = 100; // centimetres
 };
