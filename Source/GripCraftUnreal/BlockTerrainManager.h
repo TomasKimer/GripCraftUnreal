@@ -71,7 +71,7 @@ private:
 	TArray<class ABlockTerrainChunk*> CachedChunks;
 
 	FastNoiseLite NoiseLib;
-	FIntPoint PlayerChunkPosition = FIntPoint(INT_MIN, INT_MIN);
+	FIntPoint PlayerChunkPosition = FIntPoint(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min());
 
 	void UpdateChunks();
 	void CreateNewChunks();
