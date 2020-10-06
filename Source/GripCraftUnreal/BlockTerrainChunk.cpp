@@ -29,7 +29,7 @@ void ABlockTerrainChunk::Initialize(int width, int height, UBlockSettings* block
 	Height = height;
 	BlockSettings = blockSettings;
 
-	BlockData = new TArray3D<bool>(Width, Width, Height);
+	BlockData = new TArray3D<FBlockData>(Width, Width, Height);
 }
 
 
@@ -43,7 +43,9 @@ void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale,
 
 			for (int z = 0; z < Height; ++z)
 			{
-				BlockData->Get(x, y, z) = GetBlockTypeForHeight(z, height);
+				EBlockType blockType = GetBlockTypeForHeight(z, height);
+
+				BlockData->Get(x, y, z).BlockType = blockType; 
 			}
 		}
 	}
@@ -64,52 +66,53 @@ void ABlockTerrainChunk::UpdateMesh() const
 		{
 			for (int z = 0; z < Height; ++z)
 			{
-				bool isBlock = BlockData->Get(x, y, z);
-				if (isBlock == false)
+				EBlockType blockType = BlockData->Get(x, y, z).BlockType;
+				if (blockType == EBlockType::None)
 					continue;
 
+				const TSharedPtr<UBlockSettings::FBlockInfo> blockInfo = BlockSettings->GetBlockInfo(blockType);
 				int faceCount = 0;
 				FVector pos(x, y, z);
 
 				if (IsNone(x - 1, y, z))
 				{
 					AddFaceVertices(vertices, pos, UBlockSettings::LEFT_VERTICES);
-					uvs.Append(UBlockSettings::TEST_UVS);
+					uvs.Append(blockInfo->SideUVs);
 					faceCount += 1;
 				}
 
 				if (IsNone(x + 1, y, z))
 				{
 					AddFaceVertices(vertices, pos, UBlockSettings::RIGHT_VERTICES);
-					uvs.Append(UBlockSettings::TEST_UVS);
+					uvs.Append(blockInfo->SideUVs);
 					faceCount += 1;
 				}
 
 				if (IsNone(x, y, z - 1))
 				{
 					AddFaceVertices(vertices, pos, UBlockSettings::BOTTOM_VERTICES);
-					uvs.Append(UBlockSettings::TEST_UVS);
+					uvs.Append(blockInfo->BottomUVs);
 					faceCount += 1;
 				}
 
 				if (IsNone(x, y, z + 1))
 				{
 					AddFaceVertices(vertices, pos, UBlockSettings::TOP_VERTICES);
-					uvs.Append(UBlockSettings::TEST_UVS);
+					uvs.Append(blockInfo->TopUVs);
 					faceCount += 1;
 				}
 
 				if (IsNone(x, y + 1, z))
 				{
 					AddFaceVertices(vertices, pos, UBlockSettings::BACK_VERTICES);
-					uvs.Append(UBlockSettings::TEST_UVS);
+					uvs.Append(blockInfo->SideUVs);
 					faceCount += 1;
 				}
 
 				if (IsNone(x, y - 1, z))
 				{
 					AddFaceVertices(vertices, pos, UBlockSettings::FRONT_VERTICES);
-					uvs.Append(UBlockSettings::TEST_UVS);
+					uvs.Append(blockInfo->SideUVs);
 					faceCount += 1;
 				}
 
@@ -157,21 +160,21 @@ int ABlockTerrainChunk::GetTerrainHeight(int X, int Y, float NoiseScale, FVector
 }
 
 
-bool ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) const
+EBlockType ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) const
 {
 	if (InHeight > CurrMaxHeight)
-		return false;
+		return EBlockType::None;
 
 	float fraction = InHeight / static_cast<float>(Height);
 
 	if (fraction < 0.2f)
-		return true; // stone
+		return EBlockType::Stone;
 	if (fraction < 0.4f)
-		return true; // dirt
+		return EBlockType::Dirt;
 	if (fraction < 0.6f)
-		return true; // grass
+		return EBlockType::Grass;
 
-	return true; // snow
+	return EBlockType::Snow;
 }
 
 
@@ -188,8 +191,8 @@ bool ABlockTerrainChunk::IsNone(int X, int Y, int Z) const
 {
 	if (CheckBounds(X, Y, Z) == false)
 		return true;
-	
-	return BlockData->Get(X, Y, Z) == false;
+
+	return BlockData->Get(X, Y, Z).BlockType == EBlockType::None;
 }
 
 
@@ -243,13 +246,15 @@ void ABlockTerrainChunk::CreateTestCube() const
 		triangles.Add(idx + 3);
 	}
 
+	const TSharedPtr<UBlockSettings::FBlockInfo> blockInfo = BlockSettings->GetBlockInfo(EBlockType::Grass);
+
 	TArray<FVector2D> uvs;
-	uvs.Append(UBlockSettings::TEST_UVS); //side
-	uvs.Append(UBlockSettings::TEST_UVS); //side
-	uvs.Append(UBlockSettings::TEST_UVS); //side
-	uvs.Append(UBlockSettings::TEST_UVS); //side
-	uvs.Append(UBlockSettings::TEST_UVS); //top
-	uvs.Append(UBlockSettings::TEST_UVS); //bottom
+	uvs.Append(blockInfo->SideUVs);
+	uvs.Append(blockInfo->SideUVs);
+	uvs.Append(blockInfo->SideUVs);
+	uvs.Append(blockInfo->SideUVs);
+	uvs.Append(blockInfo->TopUVs);
+	uvs.Append(blockInfo->BottomUVs);
 
 	TArray<FVector> normals;
 	TArray<FProcMeshTangent> tangents;
