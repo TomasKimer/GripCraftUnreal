@@ -48,7 +48,7 @@ void ABlockTerrainManager::UpdateChunks()
 
 	PlayerChunkPosition = playerChunkPosition;
 
-	UE_LOG(LogTemp, Display, TEXT("New player chunk position: X:%d Y:%d"), PlayerChunkPosition.X, PlayerChunkPosition.Y);
+//	UE_LOG(LogTemp, Display, TEXT("New player chunk position: X:%d Y:%d"), PlayerChunkPosition.X, PlayerChunkPosition.Y);
 
 	RemoveFarChunks();
 	CreateNewChunks();
@@ -110,7 +110,7 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 	ABlockTerrainChunk* newChunk;
 	if (CachedChunks.Num() > 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Recycle chunk: X:%d Y:%d"), chunkPos.X, chunkPos.Y);
+//		UE_LOG(LogTemp, Display, TEXT("Recycle chunk: X:%d Y:%d"), chunkPos.X, chunkPos.Y);
 
 		int lastIdx = CachedChunks.Num() - 1;
 		newChunk = CachedChunks[lastIdx];
@@ -120,7 +120,7 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Display, TEXT("Create chunk: X:%d Y:%d"), chunkPos.X, chunkPos.Y);
+//		UE_LOG(LogTemp, Display, TEXT("Create chunk: X:%d Y:%d"), chunkPos.X, chunkPos.Y);
 
 		newChunk = GetWorld()->SpawnActor<ABlockTerrainChunk>(ChunkClassToSpawn, worldPos, FRotator::ZeroRotator);
 		newChunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
