@@ -19,6 +19,12 @@ class AGripCraftUnrealProjectile : public AActor
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	class UProjectileMovementComponent* ProjectileMovement;
 
+	UPROPERTY(EditAnywhere, Category = Projectile, meta = (ClampMin = "0", ClampMax = "1000"))
+	float Damage = 25.0f;
+
+	UPROPERTY(EditAnywhere, Category = Projectile)
+	bool bDestroyOnTerrainHit = true;
+
 public:
 	AGripCraftUnrealProjectile();
 

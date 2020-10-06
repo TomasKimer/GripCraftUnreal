@@ -45,10 +45,40 @@ void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale,
 			{
 				EBlockType blockType = GetBlockTypeForHeight(z, height);
 
-				BlockData->Get(x, y, z).BlockType = blockType; 
+				BlockData->Get(x, y, z).BlockType = blockType;
+
+				if (blockType != EBlockType::None)
+				{
+					BlockData->Get(x, y, z).Health = BlockSettings->GetBlockInfo(blockType)->Health;
+				}
 			}
 		}
 	}
+}
+
+
+void ABlockTerrainChunk::DamageBlock(int X, int Y, int Z, float damage)
+{
+	if (CheckBounds(X, Y, Z) == false)
+		return;
+	if (Z == 0)
+		return;
+	if (BlockData->Get(X, Y, Z).BlockType == EBlockType::None)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Already damaged"));
+		return;
+	}
+
+	float health = BlockData->Get(X, Y, Z).Health;
+	health -= damage;
+
+	if (health <= 0.0f)
+	{
+		BlockData->Get(X, Y, Z).BlockType = EBlockType::None;
+		UpdateMesh();
+	}
+
+	BlockData->Get(X, Y, Z).Health = FMath::Max(0.0f, health);
 }
 
 

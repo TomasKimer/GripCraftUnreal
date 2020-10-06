@@ -27,6 +27,7 @@ public:
 
 	void Initialize(int width, int height, UBlockSettings* blockSettings);
 	void GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, class FastNoiseLite& NoiseLib) const;
+	void DamageBlock(int X, int Y, int Z, float damage);
 	void UpdateMesh() const;
 
 private:

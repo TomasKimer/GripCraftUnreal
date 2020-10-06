@@ -36,6 +36,8 @@ public:
 
 	FVector GetOptimalPlayerSpawnLocation() const;
 
+	void DamageBlock(FVector hitPosition, FVector hitNormal, float damage);
+
 protected:
 	virtual void BeginPlay() override;
 

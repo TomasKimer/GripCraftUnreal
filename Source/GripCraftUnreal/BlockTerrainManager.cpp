@@ -38,6 +38,26 @@ FVector ABlockTerrainManager::GetOptimalPlayerSpawnLocation() const
 }
 
 
+void ABlockTerrainManager::DamageBlock(FVector hitPosition, FVector hitNormal, float damage)
+{
+	FVector damageBlockPosition = hitPosition - hitNormal * BlockSettings->BlockSize * 0.5f;
+	FIntPoint chunkPosition = GetChunkPosition(damageBlockPosition);
+
+	ABlockTerrainChunk** chunk = ActiveChunks.Find(chunkPosition);
+	if (chunk == nullptr)
+		return;
+
+	int positionInChunkX = FMath::FloorToInt(damageBlockPosition.X / BlockSettings->BlockSize) - chunkPosition.X * ChunkWidth;
+	int positionInChunkY = FMath::FloorToInt(damageBlockPosition.Y / BlockSettings->BlockSize) - chunkPosition.Y * ChunkWidth;;
+	int positionInChunkZ = FMath::FloorToInt(damageBlockPosition.Z / BlockSettings->BlockSize);
+
+	UE_LOG(LogTemp, Display, TEXT("Damage block, Chunk pos: %s, BlockPos: %s, Damage: %f, Normal: %s"),
+            ToCStr(chunkPosition.ToString()), ToCStr(FIntVector(positionInChunkX, positionInChunkY, positionInChunkZ).ToString()), damage, ToCStr(hitNormal.ToString()));
+
+	(*chunk)->DamageBlock(positionInChunkX, positionInChunkY, positionInChunkZ, damage);
+}
+
+
 void ABlockTerrainManager::UpdateChunks()
 {
 	FVector   playerPosition      = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation(); // SP only, but it's enough for now

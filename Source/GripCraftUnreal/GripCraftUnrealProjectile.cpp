@@ -1,6 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GripCraftUnrealProjectile.h"
+
+#include "BlockTerrainChunk.h"
+#include "BlockTerrainManager.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 
@@ -33,11 +36,26 @@ AGripCraftUnrealProjectile::AGripCraftUnrealProjectile()
 
 void AGripCraftUnrealProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	// Only add impulse and destroy projectile if we hit a physics
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
+	if (OtherActor == nullptr)
+		return;
+	if (OtherActor == this)
+		return;
+
+	if ((OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
 	{
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
+	}
+	else if (OtherActor->IsA(ABlockTerrainChunk::StaticClass()))
+	{
+		ABlockTerrainManager* blockTerrainManager = Cast<ABlockTerrainManager>(OtherActor->GetAttachParentActor());
+		if (blockTerrainManager != nullptr)
+		{
+			blockTerrainManager->DamageBlock(Hit.ImpactPoint, Hit.Normal, Damage);
 
-//		Destroy();
+			if (bDestroyOnTerrainHit)
+			{
+				Destroy();
+			}
+		}
 	}
 }
