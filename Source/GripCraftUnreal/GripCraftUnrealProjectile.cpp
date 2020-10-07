@@ -51,6 +51,7 @@ void AGripCraftUnrealProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Oth
 		if (blockTerrainManager != nullptr)
 		{
 			blockTerrainManager->DamageBlock(Hit.ImpactPoint, Hit.Normal, Damage);
+		//	blockTerrainManager->AddBlock(Hit.ImpactPoint, Hit.Normal, EBlockType::Stone);
 
 			if (bDestroyOnTerrainHit)
 			{

@@ -38,29 +38,45 @@ FVector ABlockTerrainManager::GetOptimalPlayerSpawnLocation() const
 }
 
 
-void ABlockTerrainManager::DamageBlock(FVector hitPosition, FVector hitNormal, float damage)
+void ABlockTerrainManager::AddBlock(FVector HitPosition, FVector HitNormal, EBlockType BlockType)
 {
-	FVector damageBlockPosition = hitPosition - hitNormal * BlockSettings->BlockSize * 0.5f;
-	FIntPoint chunkPosition = GetChunkPosition(damageBlockPosition);
+	FVector damageBlockPosition = HitPosition + HitNormal * BlockSettings->BlockSize * 0.5f;
+	FIntPoint     chunkPosition = GetChunkPosition(damageBlockPosition);
 
 	ABlockTerrainChunk** chunk = ActiveChunks.Find(chunkPosition);
 	if (chunk == nullptr)
 		return;
 
-	int positionInChunkX = FMath::FloorToInt(damageBlockPosition.X / BlockSettings->BlockSize) - chunkPosition.X * ChunkWidth;
-	int positionInChunkY = FMath::FloorToInt(damageBlockPosition.Y / BlockSettings->BlockSize) - chunkPosition.Y * ChunkWidth;;
-	int positionInChunkZ = FMath::FloorToInt(damageBlockPosition.Z / BlockSettings->BlockSize);
+	FIntVector positionInChunk = GetPositionInChunk(chunkPosition, damageBlockPosition);
+
+	UE_LOG(LogTemp, Display, TEXT("Add block, Chunk pos: %s, BlockPos: %s, BlockType: %d, Normal: %s"),
+            ToCStr(chunkPosition.ToString()), ToCStr(positionInChunk.ToString()), BlockType, ToCStr(HitNormal.ToString()));
+
+	(*chunk)->SetBlock(positionInChunk.X, positionInChunk.Y, positionInChunk.Z, BlockType);
+}
+
+
+void ABlockTerrainManager::DamageBlock(FVector HitPosition, FVector HitNormal, float Damage)
+{
+	FVector damageBlockPosition = HitPosition - HitNormal * BlockSettings->BlockSize * 0.5f;
+	FIntPoint     chunkPosition = GetChunkPosition(damageBlockPosition);
+
+	ABlockTerrainChunk** chunk = ActiveChunks.Find(chunkPosition);
+	if (chunk == nullptr)
+		return;
+
+	FIntVector positionInChunk = GetPositionInChunk(chunkPosition, damageBlockPosition);
 
 	UE_LOG(LogTemp, Display, TEXT("Damage block, Chunk pos: %s, BlockPos: %s, Damage: %f, Normal: %s"),
-            ToCStr(chunkPosition.ToString()), ToCStr(FIntVector(positionInChunkX, positionInChunkY, positionInChunkZ).ToString()), damage, ToCStr(hitNormal.ToString()));
+            ToCStr(chunkPosition.ToString()), ToCStr(positionInChunk.ToString()), Damage, ToCStr(HitNormal.ToString()));
 
-	(*chunk)->DamageBlock(positionInChunkX, positionInChunkY, positionInChunkZ, damage);
+	(*chunk)->DamageBlock(positionInChunk.X, positionInChunk.Y, positionInChunk.Z, Damage);
 }
 
 
 void ABlockTerrainManager::UpdateChunks()
 {
-	FVector   playerPosition      = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation(); // SP only, but it's enough for now
+	FVector playerPosition = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation(); // SP only, but it's enough for now
 	FIntPoint playerChunkPosition = GetChunkPosition(playerPosition);
 
 	if (playerChunkPosition == PlayerChunkPosition)
@@ -116,10 +132,10 @@ void ABlockTerrainManager::RemoveFarChunks()
 }
 
 
-ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
+ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint ChunkPos)
 {
-	int worldX = chunkPos.X * ChunkWidth;
-	int worldY = chunkPos.Y * ChunkWidth;
+	int worldX = ChunkPos.X * ChunkWidth;
+	int worldY = ChunkPos.Y * ChunkWidth;
 
 	FVector worldPos(
 		worldX * BlockSettings->BlockSize,
@@ -147,7 +163,7 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 		newChunk->Initialize(ChunkWidth, ChunkHeight, BlockSettings);
 	}
 
-	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + chunkPos.ToString());
+	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + ChunkPos.ToString());
 	newChunk->GenerateHeightmap(worldX, worldY, NoiseScale, NoiseOffset, NoiseLib);
 	newChunk->UpdateMesh();
 
@@ -155,11 +171,21 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint chunkPos)
 }
 
 
-FIntPoint ABlockTerrainManager::GetChunkPosition(FVector position) const
+FIntVector ABlockTerrainManager::GetPositionInChunk(FIntPoint ChunkPosition, FVector TargetPosition) const
+{
+	return FIntVector(
+    FMath::FloorToInt(TargetPosition.X / BlockSettings->BlockSize) - ChunkPosition.X * ChunkWidth,
+    FMath::FloorToInt(TargetPosition.Y / BlockSettings->BlockSize) - ChunkPosition.Y * ChunkWidth,
+    FMath::FloorToInt(TargetPosition.Z / BlockSettings->BlockSize)
+    );
+}
+
+
+FIntPoint ABlockTerrainManager::GetChunkPosition(FVector Position) const
 {
 	return FIntPoint(
-		FMath::FloorToInt(position.X / (ChunkWidth * BlockSettings->BlockSize)),
-		FMath::FloorToInt(position.Y / (ChunkWidth * BlockSettings->BlockSize))
+		FMath::FloorToInt(Position.X / (ChunkWidth * BlockSettings->BlockSize)),
+		FMath::FloorToInt(Position.Y / (ChunkWidth * BlockSettings->BlockSize))
 	);
 }
 

@@ -57,20 +57,38 @@ void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale,
 }
 
 
-void ABlockTerrainChunk::DamageBlock(int X, int Y, int Z, float damage)
+void ABlockTerrainChunk::SetBlock(int X, int Y, int Z, EBlockType BlockType)
+{
+	if (CheckBounds(X, Y, Z) == false)
+		return;
+
+	if (BlockData->Get(X, Y, Z).BlockType != EBlockType::None)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Block already occupied"));
+	}
+
+	BlockData->Get(X, Y, Z).BlockType = BlockType;
+	BlockData->Get(X, Y, Z).Health    = BlockSettings->GetBlockInfo(BlockType)->Health;
+
+	UpdateMesh();
+}
+
+
+void ABlockTerrainChunk::DamageBlock(int X, int Y, int Z, float Damage)
 {
 	if (CheckBounds(X, Y, Z) == false)
 		return;
 	if (Z == 0)
 		return;
+
 	if (BlockData->Get(X, Y, Z).BlockType == EBlockType::None)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Already damaged"));
+		UE_LOG(LogTemp, Warning, TEXT("Block already destroyed"));
 		return;
 	}
 
 	float health = BlockData->Get(X, Y, Z).Health;
-	health -= damage;
+	health -= Damage;
 
 	if (health <= 0.0f)
 	{
@@ -167,7 +185,7 @@ void ABlockTerrainChunk::UpdateMesh() const
 	TArray<FProcMeshTangent> tangents;
 	TArray<FLinearColor> vertexColors;
 
-	// TODO looks weird, something must be wrong here (and is way toooo slow)
+	// TODO this is not needed, it looks worse (and is way toooo slow)
 //	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, uvs, normals, tangents);
 
 	ProceduralMeshComponent->ClearMeshSection(0);

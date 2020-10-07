@@ -3,10 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-
 #include "BlockSettings.h"
-#include "BlockTerrainChunk.h"
 #include "GameFramework/Actor.h"
 #include "FastNoiseLite.h"
 #include "BlockTerrainManager.generated.h"
@@ -35,8 +32,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	FVector GetOptimalPlayerSpawnLocation() const;
-
-	void DamageBlock(FVector hitPosition, FVector hitNormal, float damage);
+	void AddBlock(FVector HitPosition, FVector HitNormal, EBlockType BlockType);
+	void DamageBlock(FVector HitPosition, FVector HitNormal, float Damage);
 
 protected:
 	virtual void BeginPlay() override;
@@ -61,7 +58,7 @@ private:
 	FVector2D NoiseOffset = FVector2D(73.73f, 6562.0f);
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ABlockTerrainChunk> ChunkClassToSpawn;
+	TSubclassOf<class ABlockTerrainChunk> ChunkClassToSpawn;
 
 	UPROPERTY(EditDefaultsOnly)
 	UBlockSettings* BlockSettings;
@@ -78,8 +75,9 @@ private:
 	void UpdateChunks();
 	void CreateNewChunks();
 	void RemoveFarChunks();
-	class ABlockTerrainChunk* CreateChunk(FIntPoint chunkPos);
-	FIntPoint GetChunkPosition(FVector position) const;
+	class ABlockTerrainChunk* CreateChunk(FIntPoint ChunkPos);
+	FIntVector GetPositionInChunk(FIntPoint ChunkPosition, FVector TargetPosition) const;
+	FIntPoint GetChunkPosition(FVector Position) const;
 
 	static FastNoiseLite::NoiseType ConvertNoiseType(ENoiseType NoiseType);
 };
