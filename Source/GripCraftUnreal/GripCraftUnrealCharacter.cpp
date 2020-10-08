@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
+#include "BlockTerrainManipulator.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -84,6 +85,13 @@ AGripCraftUnrealCharacter::AGripCraftUnrealCharacter()
 	//bUsingMotionControllers = true;
 }
 
+void AGripCraftUnrealCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	BlockTerrainManipulator->Update(FirstPersonCameraComponent->GetComponentLocation(), FirstPersonCameraComponent->GetComponentRotation().Vector());
+}
+
 void AGripCraftUnrealCharacter::BeginPlay()
 {
 	// Call the base class  
@@ -103,6 +111,9 @@ void AGripCraftUnrealCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
+
+	BlockTerrainManipulator = GetWorld()->SpawnActor<ABlockTerrainManipulator>(BlockTerrainManipulatorToSpawn, FVector::ZeroVector, FRotator::ZeroRotator);
+	BlockTerrainManipulator->Show(false);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -167,7 +178,7 @@ void AGripCraftUnrealCharacter::OnFire()
 	// try and play the sound if specified
 	if (FireSound != NULL)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+//		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 
 	// try and play a firing animation if specified

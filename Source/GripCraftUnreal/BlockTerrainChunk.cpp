@@ -3,7 +3,6 @@
 
 #include "BlockTerrainChunk.h"
 #include "ProceduralMeshComponent.h"
-#include "KismetProceduralMeshLibrary.h"
 #include "FastNoiseLite.h"
 #include "BlockSettings.h"
 
@@ -252,64 +251,4 @@ bool ABlockTerrainChunk::CheckBounds(int X, int Y, int Z) const
 		return false;
 
 	return true;
-}
-
-
-void ABlockTerrainChunk::CreateTestCube() const
-{
-	const int   FACE_COUNT        = 6;
-	const int   INDICES_PER_FACE  = 6;
-	const int   VERTICES_PER_FACE = 4;
-	const int   VERTEX_COUNT      = FACE_COUNT * VERTICES_PER_FACE;
-	const int   INDEX_COUNT       = FACE_COUNT * INDICES_PER_FACE;
-
-	TArray<FVector> vertices;
-	vertices.Reserve(VERTEX_COUNT);
-
-	vertices.Append(UBlockSettings::LEFT_VERTICES);
-	vertices.Append(UBlockSettings::RIGHT_VERTICES);
-	vertices.Append(UBlockSettings::FRONT_VERTICES);
-	vertices.Append(UBlockSettings::BACK_VERTICES);
-	vertices.Append(UBlockSettings::TOP_VERTICES);
-	vertices.Append(UBlockSettings::BOTTOM_VERTICES);
-
-	for (FVector& v : vertices)
-	{
-		v *= BlockSettings->BlockSize;
-	}
-
-	TArray<int32> triangles;
-	triangles.Reserve(INDEX_COUNT);
-
-	for (int i = 0; i < FACE_COUNT; ++i)
-	{
-		int32 idx = i * VERTICES_PER_FACE;
-
-		triangles.Add(idx);
-		triangles.Add(idx + 1);
-		triangles.Add(idx + 2);
-
-		triangles.Add(idx);
-		triangles.Add(idx + 2);
-		triangles.Add(idx + 3);
-	}
-
-	const TSharedPtr<UBlockSettings::FBlockInfo> blockInfo = BlockSettings->GetBlockInfo(EBlockType::Grass);
-
-	TArray<FVector2D> uvs;
-	uvs.Append(blockInfo->SideUVs);
-	uvs.Append(blockInfo->SideUVs);
-	uvs.Append(blockInfo->SideUVs);
-	uvs.Append(blockInfo->SideUVs);
-	uvs.Append(blockInfo->TopUVs);
-	uvs.Append(blockInfo->BottomUVs);
-
-	TArray<FVector> normals;
-	TArray<FProcMeshTangent> tangents;
-	TArray<FLinearColor> vertexColors;
-
-	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, uvs, normals, tangents);
-
-	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, vertices, triangles, normals, uvs, vertexColors, tangents, true);
-	ProceduralMeshComponent->SetMaterial(0, Material);
 }

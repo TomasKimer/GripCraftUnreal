@@ -45,8 +45,15 @@ class AGripCraftUnrealCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMotionControllerComponent* L_MotionController;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABlockTerrainManipulator> BlockTerrainManipulatorToSpawn;
+
+	UPROPERTY()
+	class ABlockTerrainManipulator* BlockTerrainManipulator;
+
 public:
 	AGripCraftUnrealCharacter();
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	virtual void BeginPlay();
