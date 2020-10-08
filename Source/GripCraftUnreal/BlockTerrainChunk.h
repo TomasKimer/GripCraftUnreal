@@ -30,7 +30,7 @@ public:
 	void SetBlock(int X, int Y, int Z, EBlockType BlockType);
 	void DamageBlock(int X, int Y, int Z, float Damage);
 	void UpdateMesh() const;
-	bool HasChanged() const { return bChanged; }
+	FORCEINLINE bool HasChanged() const { return bChanged; }
 	TArray3D<FBlockData>* TakeBlockData();
 
 private:

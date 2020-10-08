@@ -1,7 +1,7 @@
 #pragma once
 
 template<typename T>
-class TArray3D
+class TArray3D final
 {
 public:
 	TArray3D(size_t SizeX, size_t SizeY, size_t SizeZ)
@@ -18,11 +18,9 @@ public:
 		delete[] Array;
 	}
 
-	T& Get(int X, int Y, int Z)
+	FORCEINLINE T& Get(int X, int Y, int Z)
 	{
-		int flatIndex = FlattenIndex(X, Y, Z);
-
-		return Array[flatIndex];
+		return Array[FlattenIndex(X, Y, Z)];
 	}
 
 	void ClearData()
@@ -37,7 +35,7 @@ private:
 	size_t SizeY;
 	size_t SizeZ;
 
-	int FlattenIndex(int X, int Y, int Z) const
+	FORCEINLINE int FlattenIndex(int X, int Y, int Z) const
 	{
 		check(X >= 0 && X < SizeX);
 		check(Y >= 0 && Y < SizeY);
@@ -46,7 +44,7 @@ private:
 		return X + SizeX * (Y + SizeY * Z);
 	}
 
-	int Count() const
+	FORCEINLINE int Count() const
 	{
 		return SizeX * SizeY * SizeZ;
 	}

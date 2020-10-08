@@ -8,7 +8,7 @@
 #include "BlockTerrainManipulator.generated.h"
 
 UCLASS()
-class GRIPCRAFTUNREAL_API ABlockTerrainManipulator : public AActor
+class GRIPCRAFTUNREAL_API ABlockTerrainManipulator final : public AActor
 {
 	GENERATED_BODY()
 
@@ -49,5 +49,5 @@ private:
 	void UpdateUVs(EBlockType BlockType);
 	void UpdateSelectedBlock(bool bVisible);
 	void Show(bool bVisible) const;
-	EBlockType GetSelectedBlock() const { return BlockVariants[SelectedBlockIndex]; }
+	FORCEINLINE EBlockType GetSelectedBlock() const { return BlockVariants[SelectedBlockIndex]; }
 };

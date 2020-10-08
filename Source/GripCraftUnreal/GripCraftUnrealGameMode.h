@@ -16,6 +16,3 @@ public:
 
 	virtual void StartPlay() override;
 };
-
-
-
