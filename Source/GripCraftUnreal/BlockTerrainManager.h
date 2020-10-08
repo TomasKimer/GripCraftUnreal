@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BlockSettings.h"
+#include "BlockTerrainChunk.h"
 #include "GameFramework/Actor.h"
 #include "FastNoiseLite.h"
 #include "BlockTerrainManager.generated.h"
@@ -28,6 +29,7 @@ class GRIPCRAFTUNREAL_API ABlockTerrainManager final : public AActor
 
 public:
 	ABlockTerrainManager();
+	~ABlockTerrainManager();
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -58,24 +60,25 @@ private:
 	FVector2D NoiseOffset = FVector2D(73.73f, 6562.0f);
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ABlockTerrainChunk> ChunkClassToSpawn;
+	TSubclassOf<ABlockTerrainChunk> ChunkClassToSpawn;
 
 	UPROPERTY(EditDefaultsOnly)
 	UBlockSettings* BlockSettings;
 
 	UPROPERTY()
-	TMap<FIntPoint, class ABlockTerrainChunk*> ActiveChunks;
+	TMap<FIntPoint, ABlockTerrainChunk*> ActiveChunks;
 
 	UPROPERTY()
-	TArray<class ABlockTerrainChunk*> CachedChunks;
+	TArray<ABlockTerrainChunk*> CachedChunks;
 
+	TMap<FIntPoint, TArray3D<FBlockData>*> CachedBlockData;
 	FastNoiseLite NoiseLib;
 	FIntPoint PlayerChunkPosition = FIntPoint(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min());
 
 	void UpdateChunks();
 	void CreateNewChunks();
 	void RemoveFarChunks();
-	class ABlockTerrainChunk* CreateChunk(FIntPoint ChunkPos);
+	ABlockTerrainChunk* CreateChunk(FIntPoint ChunkPos);
 	FIntVector GetPositionInChunk(FIntPoint ChunkPosition, FVector TargetPosition) const;
 	FIntPoint GetChunkPosition(FVector Position) const;
 

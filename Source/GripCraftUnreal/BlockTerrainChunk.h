@@ -25,11 +25,13 @@ public:
 	ABlockTerrainChunk();
 	~ABlockTerrainChunk();
 
-	void Initialize(int width, int height, UBlockSettings* blockSettings);
+	void Initialize(int width, int height, UBlockSettings* blockSettings, TArray3D<FBlockData>* blockData = nullptr);
 	void GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, class FastNoiseLite& NoiseLib) const;
 	void SetBlock(int X, int Y, int Z, EBlockType BlockType);
 	void DamageBlock(int X, int Y, int Z, float Damage);
 	void UpdateMesh() const;
+	bool HasChanged() const { return bChanged; }
+	TArray3D<FBlockData>* TakeBlockData();
 
 private:
 	UPROPERTY(VisibleDefaultsOnly)
@@ -42,6 +44,7 @@ private:
 	UBlockSettings* BlockSettings;
 
 	int Width, Height;
+	bool bChanged = false;
 	TArray3D<FBlockData>* BlockData;
 
 	int GetTerrainHeight(int X, int Y, float NoiseScale, FVector2D NoiseOffset, class FastNoiseLite& NoiseLib) const;
@@ -49,5 +52,4 @@ private:
 	void AddFaceVertices(TArray<FVector>& Vertices, const FVector& Origin, const TArray<FVector>& VerticesToAdd) const;
 	bool IsNone(int X, int Y, int Z) const;
 	bool CheckBounds(int X, int Y, int Z) const;
-	void CreateTestCube() const;
 };

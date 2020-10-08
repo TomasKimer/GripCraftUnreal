@@ -12,6 +12,13 @@ ABlockTerrainManager::ABlockTerrainManager()
 }
 
 
+ABlockTerrainManager::~ABlockTerrainManager()
+{
+	for (const auto& pair : CachedBlockData)
+		delete pair.Value;
+}
+
+
 void ABlockTerrainManager::BeginPlay()
 {
 	Super::BeginPlay();
@@ -124,6 +131,10 @@ void ABlockTerrainManager::RemoveFarChunks()
 	for (const FIntPoint& chunkToRemove : chunksToRemove)
 	{
 		ABlockTerrainChunk* chunk = ActiveChunks[chunkToRemove];
+		if (chunk->HasChanged() == true)
+		{
+			CachedBlockData.Add(chunkToRemove, chunk->TakeBlockData());
+		}
 
 		CachedChunks.Emplace(chunk);
 		ActiveChunks.Remove(chunkToRemove);
@@ -159,11 +170,22 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint ChunkPos)
 
 		newChunk = GetWorld()->SpawnActor<ABlockTerrainChunk>(ChunkClassToSpawn, worldPos, FRotator::ZeroRotator);
 		newChunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-		newChunk->Initialize(ChunkWidth, ChunkHeight, BlockSettings);
 	}
 
+	TArray3D<FBlockData>** cachedBlockData = CachedBlockData.Find(ChunkPos);
+
+	newChunk->Initialize(ChunkWidth, ChunkHeight, BlockSettings, cachedBlockData != nullptr ? *cachedBlockData : nullptr);
 	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + ChunkPos.ToString());
-	newChunk->GenerateHeightmap(worldX, worldY, NoiseScale, NoiseOffset, NoiseLib);
+
+	if (cachedBlockData == nullptr)
+	{
+		newChunk->GenerateHeightmap(worldX, worldY, NoiseScale, NoiseOffset, NoiseLib);	
+	}
+	else
+	{
+		CachedBlockData.Remove(ChunkPos);
+	}
+
 	newChunk->UpdateMesh();
 
 	return newChunk;

@@ -22,13 +22,25 @@ ABlockTerrainChunk::~ABlockTerrainChunk()
 }
 
 
-void ABlockTerrainChunk::Initialize(int width, int height, UBlockSettings* blockSettings)
+void ABlockTerrainChunk::Initialize(int width, int height, UBlockSettings* blockSettings, TArray3D<FBlockData>* blockData)
 {
 	Width = width;
 	Height = height;
 	BlockSettings = blockSettings;
 
-	BlockData = new TArray3D<FBlockData>(Width, Width, Height);
+	if (BlockData != nullptr)
+		delete BlockData;
+
+	if (blockData == nullptr)
+	{
+		BlockData = new TArray3D<FBlockData>(Width, Width, Height);
+		bChanged = false;
+	}
+	else
+	{
+		BlockData = blockData;
+		bChanged = true;
+	}
 }
 
 
@@ -70,6 +82,8 @@ void ABlockTerrainChunk::SetBlock(int X, int Y, int Z, EBlockType BlockType)
 	BlockData->Get(X, Y, Z).Health    = BlockSettings->GetBlockInfo(BlockType)->Health;
 
 	UpdateMesh();
+
+	bChanged = true;
 }
 
 
@@ -96,6 +110,8 @@ void ABlockTerrainChunk::DamageBlock(int X, int Y, int Z, float Damage)
 	}
 
 	BlockData->Get(X, Y, Z).Health = FMath::Max(0.0f, health);
+
+	bChanged = true;
 }
 
 
@@ -190,6 +206,15 @@ void ABlockTerrainChunk::UpdateMesh() const
 	ProceduralMeshComponent->ClearMeshSection(0);
 	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, vertices, triangles, normals, uvs, vertexColors, tangents, true);
 	ProceduralMeshComponent->SetMaterial(0, Material);
+}
+
+
+TArray3D<FBlockData>* ABlockTerrainChunk::TakeBlockData()
+{
+	TArray3D<FBlockData>* data = BlockData;
+	BlockData = nullptr;
+
+	return data;
 }
 
 
