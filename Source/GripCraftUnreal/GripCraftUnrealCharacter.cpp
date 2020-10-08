@@ -131,6 +131,9 @@ void AGripCraftUnrealCharacter::SetupPlayerInputComponent(class UInputComponent*
 	// Bind fire event
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AGripCraftUnrealCharacter::OnFire);
 
+	// Bind alternate fire event
+	PlayerInputComponent->BindAction("AlternateFire", IE_Pressed, this, &AGripCraftUnrealCharacter::OnAlternateFire);
+
 	// Enable touchscreen input
 	EnableTouchscreenMovement(PlayerInputComponent);
 
@@ -191,6 +194,11 @@ void AGripCraftUnrealCharacter::OnFire()
 			AnimInstance->Montage_Play(FireAnimation, 1.f);
 		}
 	}
+}
+
+void AGripCraftUnrealCharacter::OnAlternateFire()
+{
+	BlockTerrainManipulator->PlaceCurrentBlock();
 }
 
 void AGripCraftUnrealCharacter::OnResetVR()

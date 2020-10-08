@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "BlockTerrainManager.h"
 
 
 ABlockTerrainManipulator::ABlockTerrainManipulator()
@@ -60,6 +61,12 @@ void ABlockTerrainManipulator::ChangeBlock(int direction)
 }
 
 
+void ABlockTerrainManipulator::PlaceCurrentBlock()
+{
+	bPlaceCurrentBlock = true;
+}
+
+
 void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
 {
 	const FCollisionQueryParams params;
@@ -69,7 +76,7 @@ void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
 
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, ViewOrigin, endLocation, ECC_GameTraceChannel2, params) == true)
 	{
-		FVector hitBlockPosition = hitResult.Location + hitResult.Normal * blockSize * 0.5f;
+		const FVector hitBlockPosition = hitResult.Location + hitResult.Normal * blockSize * 0.5f;
 
 		DrawDebugLine(GetWorld(), hitResult.Location, hitBlockPosition, FColor(0, 255, 0));
 
@@ -77,13 +84,23 @@ void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
 
 		if (hitActor->IsA(ABlockTerrainChunk::StaticClass()))
 		{
-			hitBlockPosition.X = blockSize * FMath::FloorToInt(hitBlockPosition.X / blockSize);
-			hitBlockPosition.Y = blockSize * FMath::FloorToInt(hitBlockPosition.Y / blockSize);
-			hitBlockPosition.Z = blockSize * FMath::FloorToInt(hitBlockPosition.Z / blockSize);
+			FVector alignedBlockPosition(
+				blockSize * FMath::FloorToInt(hitBlockPosition.X / blockSize),
+				blockSize * FMath::FloorToInt(hitBlockPosition.Y / blockSize),
+				blockSize * FMath::FloorToInt(hitBlockPosition.Z / blockSize)
+			);
 
-			SetActorLocation(hitBlockPosition);
-
+			SetActorLocation(alignedBlockPosition);
 			Show(true);
+
+			if (bPlaceCurrentBlock == true)
+			{
+				ABlockTerrainManager* blockTerrainManager = Cast<ABlockTerrainManager>(hitActor->GetAttachParentActor());
+				if (blockTerrainManager != nullptr)
+				{
+					blockTerrainManager->AddBlock(hitBlockPosition, BlockVariants[SelectedBlockIndex]);
+				}
+			}
         }
 		else
 		{
@@ -94,6 +111,8 @@ void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
 	{
 		Show(false);
 	}
+
+	bPlaceCurrentBlock = false;
 }
 
 

@@ -92,6 +92,9 @@ protected:
 	/** Fires a projectile. */
 	void OnFire();
 
+	/** Places a block. */
+	void OnAlternateFire();
+
 	/** Resets HMD orientation and position in VR. */
 	void OnResetVR();
 

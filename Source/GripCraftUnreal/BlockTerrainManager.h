@@ -32,7 +32,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	FVector GetOptimalPlayerSpawnLocation() const;
-	void AddBlock(FVector HitPosition, FVector HitNormal, EBlockType BlockType);
+	void AddBlock(FVector AddBlockPosition, EBlockType BlockType);
 	void DamageBlock(FVector HitPosition, FVector HitNormal, float Damage);
 
 protected:

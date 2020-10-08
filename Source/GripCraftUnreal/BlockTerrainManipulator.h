@@ -19,6 +19,7 @@ public:
 
 	void Show(bool bVisible) const;
 	void ChangeBlock(int direction);
+	void PlaceCurrentBlock();
 	void Update(FVector ViewOrigin, FVector ViewDirection);
 
 protected:
@@ -41,6 +42,7 @@ private:
 	float MaxRaycastDistance = 10.0f;
 
 	int SelectedBlockIndex = 0;
+	bool bPlaceCurrentBlock = false;
 	TArray<FVector> Vertices;
 	TArray<int32> Triangles;
 	TArray<FVector2D> UVs;

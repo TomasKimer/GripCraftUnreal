@@ -38,19 +38,18 @@ FVector ABlockTerrainManager::GetOptimalPlayerSpawnLocation() const
 }
 
 
-void ABlockTerrainManager::AddBlock(FVector HitPosition, FVector HitNormal, EBlockType BlockType)
+void ABlockTerrainManager::AddBlock(FVector AddBlockPosition, EBlockType BlockType)
 {
-	FVector damageBlockPosition = HitPosition + HitNormal * BlockSettings->BlockSize * 0.5f;
-	FIntPoint     chunkPosition = GetChunkPosition(damageBlockPosition);
+	FIntPoint chunkPosition = GetChunkPosition(AddBlockPosition);
 
 	ABlockTerrainChunk** chunk = ActiveChunks.Find(chunkPosition);
 	if (chunk == nullptr)
 		return;
 
-	FIntVector positionInChunk = GetPositionInChunk(chunkPosition, damageBlockPosition);
+	FIntVector positionInChunk = GetPositionInChunk(chunkPosition, AddBlockPosition);
 
-	UE_LOG(LogTemp, Display, TEXT("Add block, Chunk pos: %s, BlockPos: %s, BlockType: %d, Normal: %s"),
-            ToCStr(chunkPosition.ToString()), ToCStr(positionInChunk.ToString()), BlockType, ToCStr(HitNormal.ToString()));
+	UE_LOG(LogTemp, Display, TEXT("Add block, Chunk pos: %s, BlockPos: %s, BlockType: %d"),
+            *chunkPosition.ToString(), *positionInChunk.ToString(), BlockType);
 
 	(*chunk)->SetBlock(positionInChunk.X, positionInChunk.Y, positionInChunk.Z, BlockType);
 }
@@ -68,7 +67,7 @@ void ABlockTerrainManager::DamageBlock(FVector HitPosition, FVector HitNormal, f
 	FIntVector positionInChunk = GetPositionInChunk(chunkPosition, damageBlockPosition);
 
 	UE_LOG(LogTemp, Display, TEXT("Damage block, Chunk pos: %s, BlockPos: %s, Damage: %f, Normal: %s"),
-            ToCStr(chunkPosition.ToString()), ToCStr(positionInChunk.ToString()), Damage, ToCStr(HitNormal.ToString()));
+            *chunkPosition.ToString(), *positionInChunk.ToString(), Damage, *HitNormal.ToString());
 
 	(*chunk)->DamageBlock(positionInChunk.X, positionInChunk.Y, positionInChunk.Z, Damage);
 }
