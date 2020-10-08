@@ -113,7 +113,6 @@ void AGripCraftUnrealCharacter::BeginPlay()
 	}
 
 	BlockTerrainManipulator = GetWorld()->SpawnActor<ABlockTerrainManipulator>(BlockTerrainManipulatorToSpawn, FVector::ZeroVector, FRotator::ZeroRotator);
-	BlockTerrainManipulator->Show(false);
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -15,9 +15,6 @@ class GRIPCRAFTUNREAL_API ABlockTerrainManipulator : public AActor
 public:	
 	ABlockTerrainManipulator();
 
-	virtual void Tick(float DeltaTime) override;
-
-	void Show(bool bVisible) const;
 	void ChangeBlock(int direction);
 	void PlaceCurrentBlock();
 	void Update(FVector ViewOrigin, FVector ViewDirection);
@@ -42,6 +39,7 @@ private:
 	float MaxRaycastDistance = 10.0f;
 
 	int SelectedBlockIndex = 0;
+	EBlockType UVsSetForBlock = EBlockType::None;
 	bool bPlaceCurrentBlock = false;
 	TArray<FVector> Vertices;
 	TArray<int32> Triangles;
@@ -49,4 +47,7 @@ private:
 
 	void CreateBlock();
 	void UpdateUVs(EBlockType BlockType);
+	void UpdateSelectedBlock(bool bVisible);
+	void Show(bool bVisible) const;
+	EBlockType GetSelectedBlock() const { return BlockVariants[SelectedBlockIndex]; }
 };

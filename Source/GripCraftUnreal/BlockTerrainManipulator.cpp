@@ -7,6 +7,7 @@
 #include "ProceduralMeshComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "BlockTerrainManager.h"
+#include "Chaos/PBDCollisionConstraintsContact.h"
 
 
 ABlockTerrainManipulator::ABlockTerrainManipulator()
@@ -23,19 +24,7 @@ void ABlockTerrainManipulator::BeginPlay()
 	Super::BeginPlay();
 
 	CreateBlock();
-	UpdateUVs(BlockVariants[0]);
-}
-
-
-void ABlockTerrainManipulator::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-
-void ABlockTerrainManipulator::Show(bool bVisible) const
-{
-	ProceduralMeshComponent->SetMeshSectionVisible(0, bVisible);
+	UpdateSelectedBlock(true);
 }
 
 
@@ -56,8 +45,6 @@ void ABlockTerrainManipulator::ChangeBlock(int direction)
 	{
 		SelectedBlockIndex = 0;
 	}
-
-	UpdateUVs(BlockVariants[SelectedBlockIndex]);
 }
 
 
@@ -69,6 +56,14 @@ void ABlockTerrainManipulator::PlaceCurrentBlock()
 
 void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
 {
+	EBlockType selectedBlock = GetSelectedBlock();
+	if (selectedBlock == EBlockType::None)
+	{
+		UpdateSelectedBlock(false);
+		bPlaceCurrentBlock = false;
+		return;
+	}
+
 	const FCollisionQueryParams params;
 	FHitResult hitResult;
 	const int blockSize = BlockSettings->BlockSize;
@@ -78,38 +73,31 @@ void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
 	{
 		const FVector hitBlockPosition = hitResult.Location + hitResult.Normal * blockSize * 0.5f;
 
-		DrawDebugLine(GetWorld(), hitResult.Location, hitBlockPosition, FColor(0, 255, 0));
+//		DrawDebugLine(GetWorld(), hitResult.Location, hitBlockPosition, FColor(0, 255, 0));
 
-		const AActor* hitActor = hitResult.Actor.Get(); // a weak pointer to the Actor that the trace hit
+		FVector alignedBlockLocation(
+			blockSize * FMath::FloorToInt(hitBlockPosition.X / blockSize),
+			blockSize * FMath::FloorToInt(hitBlockPosition.Y / blockSize),
+			blockSize * FMath::FloorToInt(hitBlockPosition.Z / blockSize)
+		);
 
-		if (hitActor->IsA(ABlockTerrainChunk::StaticClass()))
+		SetActorLocation(alignedBlockLocation);
+		UpdateSelectedBlock(true);
+
+		if (bPlaceCurrentBlock == true)
 		{
-			FVector alignedBlockPosition(
-				blockSize * FMath::FloorToInt(hitBlockPosition.X / blockSize),
-				blockSize * FMath::FloorToInt(hitBlockPosition.Y / blockSize),
-				blockSize * FMath::FloorToInt(hitBlockPosition.Z / blockSize)
-			);
+			const AActor* hitActor = hitResult.Actor.Get(); // a weak pointer to the Actor that the trace hit
+			ABlockTerrainManager* blockTerrainManager = Cast<ABlockTerrainManager>(hitActor->GetAttachParentActor());
 
-			SetActorLocation(alignedBlockPosition);
-			Show(true);
-
-			if (bPlaceCurrentBlock == true)
+			if (blockTerrainManager != nullptr)
 			{
-				ABlockTerrainManager* blockTerrainManager = Cast<ABlockTerrainManager>(hitActor->GetAttachParentActor());
-				if (blockTerrainManager != nullptr)
-				{
-					blockTerrainManager->AddBlock(hitBlockPosition, BlockVariants[SelectedBlockIndex]);
-				}
+				blockTerrainManager->AddBlock(hitBlockPosition, selectedBlock);
 			}
-        }
-		else
-		{
-			Show(false);
 		}
 	}
 	else
 	{
-		Show(false);
+		UpdateSelectedBlock(false);
 	}
 
 	bPlaceCurrentBlock = false;
@@ -163,6 +151,10 @@ void ABlockTerrainManipulator::CreateBlock()
 
 void ABlockTerrainManipulator::UpdateUVs(EBlockType BlockType)
 {
+	if (UVsSetForBlock == BlockType)
+		return;
+	UVsSetForBlock = BlockType;
+
 	TArray<FVector> normals;
 	TArray<FProcMeshTangent> tangents;
 	TArray<FLinearColor> vertexColors;
@@ -181,3 +173,26 @@ void ABlockTerrainManipulator::UpdateUVs(EBlockType BlockType)
 	UVs.Empty();
 }
 
+
+void ABlockTerrainManipulator::UpdateSelectedBlock(bool bVisible)
+{
+	EBlockType selectedBlock = GetSelectedBlock();
+	if (selectedBlock == EBlockType::None)
+	{
+		Show(false);
+	}
+	else
+	{
+		UpdateUVs(selectedBlock);
+		Show(true);
+	}
+}
+
+
+void ABlockTerrainManipulator::Show(bool bVisible) const
+{
+	if (ProceduralMeshComponent->IsMeshSectionVisible(0) == bVisible)
+		return;
+
+	ProceduralMeshComponent->SetMeshSectionVisible(0, bVisible);
+}
