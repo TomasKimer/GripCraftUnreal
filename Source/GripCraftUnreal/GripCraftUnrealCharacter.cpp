@@ -134,6 +134,10 @@ void AGripCraftUnrealCharacter::SetupPlayerInputComponent(class UInputComponent*
 	// Bind alternate fire event
 	PlayerInputComponent->BindAction("AlternateFire", IE_Pressed, this, &AGripCraftUnrealCharacter::OnAlternateFire);
 
+	// Bind change weapon events
+	PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, this, &AGripCraftUnrealCharacter::OnNextWeapon);
+	PlayerInputComponent->BindAction("PrevWeapon", IE_Pressed, this, &AGripCraftUnrealCharacter::OnPrevWeapon);
+
 	// Enable touchscreen input
 	EnableTouchscreenMovement(PlayerInputComponent);
 
@@ -199,6 +203,16 @@ void AGripCraftUnrealCharacter::OnFire()
 void AGripCraftUnrealCharacter::OnAlternateFire()
 {
 	BlockTerrainManipulator->PlaceCurrentBlock();
+}
+
+void AGripCraftUnrealCharacter::OnNextWeapon()
+{
+	BlockTerrainManipulator->ChangeBlock(1);
+}
+
+void AGripCraftUnrealCharacter::OnPrevWeapon()
+{
+	BlockTerrainManipulator->ChangeBlock(-1);
 }
 
 void AGripCraftUnrealCharacter::OnResetVR()

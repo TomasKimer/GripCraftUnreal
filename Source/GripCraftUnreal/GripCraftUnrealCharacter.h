@@ -95,6 +95,12 @@ protected:
 	/** Places a block. */
 	void OnAlternateFire();
 
+	/** Selects next block. */
+	void OnNextWeapon();
+
+	/** Selects previous block. */
+	void OnPrevWeapon();
+
 	/** Resets HMD orientation and position in VR. */
 	void OnResetVR();
 
