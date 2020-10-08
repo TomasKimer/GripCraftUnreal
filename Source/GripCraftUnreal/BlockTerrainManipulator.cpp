@@ -184,7 +184,7 @@ void ABlockTerrainManipulator::UpdateSelectedBlock(bool bVisible)
 	else
 	{
 		UpdateUVs(selectedBlock);
-		Show(true);
+		Show(bVisible);
 	}
 }
 
