@@ -33,7 +33,7 @@ enum class ETile : uint8
 USTRUCT()
 struct FBlockSetup
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
  
 	UPROPERTY(EditAnywhere)
 	EBlockType BlockType = EBlockType::Grass;
@@ -55,7 +55,7 @@ struct FBlockSetup
 USTRUCT()
 struct FTileSetup
 {
-	GENERATED_USTRUCT_BODY()
+	GENERATED_BODY()
  
     UPROPERTY(EditAnywhere)
 	ETile Tile = ETile::Grass;
