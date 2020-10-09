@@ -10,7 +10,7 @@ public:
 		this->SizeY = SizeY;
 		this->SizeZ = SizeZ;
 
-		Array = new T[Count()];
+		Array = new T[Num()];
 	}
 
 	~TArray3D()
@@ -18,14 +18,61 @@ public:
 		delete[] Array;
 	}
 
-	FORCEINLINE T& Get(int X, int Y, int Z)
+	FORCEINLINE T& Get(int X, int Y, int Z) const
 	{
 		return Array[FlattenIndex(X, Y, Z)];
 	}
 
-	void ClearData()
+	FORCEINLINE T& operator[](int Index) const
 	{
-		memset(Array, 0, Count() * sizeof(T));
+		check(Index >= 0 && Index < Num());
+
+		return Array[Index];
+	}
+
+	FORCEINLINE int Num() const
+	{
+		return SizeX * SizeY * SizeZ;
+	}
+
+	FORCEINLINE void ClearData()
+	{
+		memset(Array, 0, Num() * sizeof(T));
+	}
+
+	friend FArchive& operator<<(FArchive& Ar, TArray3D*& Array)
+	{
+		if (Ar.IsLoading() == true)
+		{
+			size_t SizeX, SizeY, SizeZ;
+
+			Ar << SizeX;
+			Ar << SizeY;
+			Ar << SizeZ;
+
+			if (Array != nullptr)
+				delete Array;
+
+			Array = new TArray3D<T>(SizeX, SizeY, SizeZ);
+
+			for (size_t i = 0; i < Array->Num(); ++i)
+			{
+				Ar << (*Array)[i];
+			}
+		}
+		else
+		{
+			Ar << Array->SizeX;
+			Ar << Array->SizeY;
+			Ar << Array->SizeZ;
+
+			for (size_t i = 0; i < Array->Num(); ++i)
+			{
+				Ar << Array->Array[i];
+			}
+		}
+
+		return Ar;
 	}
 
 private:
@@ -42,10 +89,5 @@ private:
 		check(Z >= 0 && Z < SizeZ);
 
 		return X + SizeX * (Y + SizeY * Z);
-	}
-
-	FORCEINLINE int Count() const
-	{
-		return SizeX * SizeY * SizeZ;
 	}
 };

@@ -13,6 +13,14 @@ struct FBlockData
 {
 	EBlockType BlockType;
 	float Health;
+
+	friend FArchive& operator<<(FArchive& Ar, FBlockData& BlockData)
+	{
+		Ar << BlockData.BlockType;
+		Ar << BlockData.Health;
+
+		return Ar;
+	}
 };
 
 
@@ -32,6 +40,7 @@ public:
 	void UpdateMesh() const;
 	FORCEINLINE bool HasChanged() const { return bChanged; }
 	TArray3D<FBlockData>* TakeBlockData();
+	FORCEINLINE TArray3D<FBlockData>* GetBlockData() const { return BlockData; }
 
 private:
 	UPROPERTY(VisibleDefaultsOnly)

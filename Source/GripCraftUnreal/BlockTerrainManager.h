@@ -37,6 +37,8 @@ public:
 	void AddBlock(FVector AddBlockPosition, EBlockType BlockType);
 	void DamageBlock(FVector HitPosition, FVector HitNormal, float Damage);
 
+	friend FArchive& operator<<(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -81,6 +83,7 @@ private:
 	ABlockTerrainChunk* CreateChunk(FIntPoint ChunkPos);
 	FIntVector GetPositionInChunk(FIntPoint ChunkPosition, FVector TargetPosition) const;
 	FIntPoint GetChunkPosition(FVector Position) const;
+	FVector GetPlayerLocation() const;
 
 	static FastNoiseLite::NoiseType ConvertNoiseType(ENoiseType NoiseType);
 };

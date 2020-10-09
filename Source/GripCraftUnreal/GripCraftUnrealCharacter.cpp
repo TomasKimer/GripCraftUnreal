@@ -12,6 +12,8 @@
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
 #include "BlockTerrainManipulator.h"
+#include "BlockTerrainSubsystem.h"
+#include "GripCraftUnrealSaveGame.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -141,6 +143,7 @@ void AGripCraftUnrealCharacter::SetupPlayerInputComponent(class UInputComponent*
 	EnableTouchscreenMovement(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AGripCraftUnrealCharacter::OnResetVR);
+	PlayerInputComponent->BindAction("QuickSave", IE_Pressed, this, &AGripCraftUnrealCharacter::OnQuickSave);
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGripCraftUnrealCharacter::MoveForward);
@@ -217,6 +220,13 @@ void AGripCraftUnrealCharacter::OnPrevWeapon()
 void AGripCraftUnrealCharacter::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
+}
+
+void AGripCraftUnrealCharacter::OnQuickSave()
+{
+	UGripCraftUnrealSaveGame::Save(*GetWorld()->GetSubsystem<UBlockTerrainSubsystem>()->GetManager(), GetActorLocation(), GetActorRotation());
+
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Game Saved."));
 }
 
 void AGripCraftUnrealCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, const FVector Location)

@@ -4,6 +4,8 @@
 #include "BlockTerrainManager.h"
 #include "BlockSettings.h"
 #include "BlockTerrainChunk.h"
+#include "BlockTerrainSubsystem.h"
+#include "GripCraftUnrealSaveGame.h"
 
 
 ABlockTerrainManager::ABlockTerrainManager()
@@ -22,6 +24,8 @@ ABlockTerrainManager::~ABlockTerrainManager()
 void ABlockTerrainManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetWorld()->GetSubsystem<UBlockTerrainSubsystem>()->RegisterManager(this);
 
 	NoiseLib.SetNoiseType(ConvertNoiseType(NoiseType));
 }
@@ -82,9 +86,7 @@ void ABlockTerrainManager::DamageBlock(FVector HitPosition, FVector HitNormal, f
 
 void ABlockTerrainManager::UpdateChunks()
 {
-	FVector playerPosition = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation(); // SP only, but it's enough for now
-	FIntPoint playerChunkPosition = GetChunkPosition(playerPosition);
-
+	const FIntPoint playerChunkPosition = GetChunkPosition(GetPlayerLocation());
 	if (playerChunkPosition == PlayerChunkPosition)
 		return;
 
@@ -211,6 +213,20 @@ FIntPoint ABlockTerrainManager::GetChunkPosition(FVector Position) const
 }
 
 
+FVector ABlockTerrainManager::GetPlayerLocation() const  // SP only, but it's enough for now
+{
+	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController == nullptr)
+		return FVector();
+
+	APawn* PlayerPawn = PlayerController->GetPawn();
+	if (PlayerPawn == nullptr)
+		return FVector();
+
+	return PlayerPawn->GetActorLocation();
+}
+
+
 FastNoiseLite::NoiseType ABlockTerrainManager::ConvertNoiseType(ENoiseType NoiseType)
 {
 	switch (NoiseType)
@@ -223,4 +239,37 @@ FastNoiseLite::NoiseType ABlockTerrainManager::ConvertNoiseType(ENoiseType Noise
 	case ENoiseType::Value:         return FastNoiseLite::NoiseType_Value;
 	default: checkNoEntry();        return FastNoiseLite::NoiseType_Perlin;
 	}
+}
+
+
+FArchive& operator<<(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager)
+{
+	Ar << BlockTerrainManager.ChunkWidth;
+	Ar << BlockTerrainManager.ChunkHeight;
+	Ar << BlockTerrainManager.NoiseType;
+	Ar << BlockTerrainManager.NoiseScale;
+	Ar << BlockTerrainManager.NoiseOffset;
+
+	if (Ar.IsLoading() == true)
+	{
+		Ar << BlockTerrainManager.CachedBlockData;
+	}
+	else
+	{
+		TMap<FIntPoint, TArray3D<FBlockData>*> SaveBlockData;
+
+		for (const TTuple<FIntPoint, ABlockTerrainChunk*>& Pair : BlockTerrainManager.ActiveChunks)
+		{
+			if (Pair.Value->HasChanged() == false)
+				continue;
+
+			SaveBlockData.Add(Pair.Key, Pair.Value->GetBlockData());
+		}
+
+		SaveBlockData.Append(BlockTerrainManager.CachedBlockData);
+
+		Ar << SaveBlockData;
+	}
+
+	return Ar;
 }
