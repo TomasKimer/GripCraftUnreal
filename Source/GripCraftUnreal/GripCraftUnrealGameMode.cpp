@@ -1,13 +1,13 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GripCraftUnrealGameMode.h"
-
 #include "BlockTerrainManager.h"
 #include "BlockTerrainSubsystem.h"
 #include "EngineUtils.h"
 #include "GripCraftUnrealHUD.h"
 #include "GripCraftUnrealSaveGame.h"
 #include "UObject/ConstructorHelpers.h"
+
 
 AGripCraftUnrealGameMode::AGripCraftUnrealGameMode()
 	: Super()
@@ -25,14 +25,15 @@ void AGripCraftUnrealGameMode::StartPlay()
 	Super::StartPlay();
 
 	ABlockTerrainManager* BlockTerrainManager = GetWorld()->GetSubsystem<UBlockTerrainSubsystem>()->GetManager();
-	APawn* playerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
-	FVector playerLocation;
-	FRotator playerRotation;
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	APawn* PlayerPawn = PlayerController->GetPawn();
+	FVector PlayerLocation;
+	FRotator PlayerRotation;
 
-	if (FGripCraftUnrealSaveGame::Load(*BlockTerrainManager, playerLocation, playerRotation) == true)
+	if (FGripCraftUnrealSaveGame::Load(*BlockTerrainManager, PlayerLocation, PlayerRotation) == true)
 	{
-		playerPawn->SetActorLocation(playerLocation);
-		playerPawn->SetActorRotation(playerRotation);
+		PlayerPawn->SetActorLocation(PlayerLocation);
+		PlayerController->SetControlRotation(PlayerRotation);
 
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Game Loaded."));
 	}
@@ -40,6 +41,6 @@ void AGripCraftUnrealGameMode::StartPlay()
 	{
 		const FVector OptimalSpawnActorLocation = BlockTerrainManager->GetOptimalPlayerSpawnLocation();
 
-		playerPawn->SetActorLocation(OptimalSpawnActorLocation);
+		PlayerPawn->SetActorLocation(OptimalSpawnActorLocation);
 	}
 }

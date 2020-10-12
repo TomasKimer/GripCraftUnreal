@@ -224,7 +224,7 @@ void AGripCraftUnrealCharacter::OnResetVR()
 
 void AGripCraftUnrealCharacter::OnQuickSave()
 {
-	FGripCraftUnrealSaveGame::Save(*GetWorld()->GetSubsystem<UBlockTerrainSubsystem>()->GetManager(), GetActorLocation(), GetActorRotation());
+	FGripCraftUnrealSaveGame::Save(*GetWorld()->GetSubsystem<UBlockTerrainSubsystem>()->GetManager(), GetActorLocation(), Controller->GetControlRotation());
 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Game Saved."));
 }
