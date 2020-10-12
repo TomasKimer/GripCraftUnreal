@@ -23,21 +23,9 @@ public:
 		return Array[FlattenIndex(X, Y, Z)];
 	}
 
-	FORCEINLINE T& operator[](int Index) const
-	{
-		check(Index >= 0 && Index < Num());
-
-		return Array[Index];
-	}
-
-	FORCEINLINE int Num() const
+	FORCEINLINE size_t Num() const
 	{
 		return SizeX * SizeY * SizeZ;
-	}
-
-	FORCEINLINE void ClearData()
-	{
-		memset(Array, 0, Num() * sizeof(T));
 	}
 
 	friend FArchive& operator<<(FArchive& Ar, TArray3D*& Array)
@@ -57,7 +45,7 @@ public:
 
 			for (size_t i = 0; i < Array->Num(); ++i)
 			{
-				Ar << (*Array)[i];
+				Ar << Array->Array[i];
 			}
 		}
 		else
