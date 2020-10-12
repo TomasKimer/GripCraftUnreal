@@ -4,16 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "BlockTerrainManager.h"
-#include "GameFramework/SaveGame.h"
 #include "Serialization/BufferArchive.h"
-#include "GripCraftUnrealSaveGame.generated.h"
 
 
-UCLASS()
-class GRIPCRAFTUNREAL_API UGripCraftUnrealSaveGame final : public USaveGame
+class FGripCraftUnrealSaveGame
 {
-	GENERATED_BODY()
-
 	static void SaveLoad(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager, FVector& PlayerPos, FRotator& PlayerRot);
 
 public:

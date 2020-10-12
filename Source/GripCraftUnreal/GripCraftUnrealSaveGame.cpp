@@ -5,10 +5,10 @@
 #include "Kismet/GameplayStatics.h"
 
 
-const FString UGripCraftUnrealSaveGame::DefaultSlotName  = "slot04";
-const int     UGripCraftUnrealSaveGame::DefaultUserIndex = 0;
+const FString FGripCraftUnrealSaveGame::DefaultSlotName  = "slot04";
+const int     FGripCraftUnrealSaveGame::DefaultUserIndex = 0;
 
-void UGripCraftUnrealSaveGame::Save(ABlockTerrainManager& BlockTerrainManager, FVector PlayerPos, FRotator PlayerRot)
+void FGripCraftUnrealSaveGame::Save(ABlockTerrainManager& BlockTerrainManager, FVector PlayerPos, FRotator PlayerRot)
 {
 	FBufferArchive Archive;
 	SaveLoad(Archive, BlockTerrainManager, PlayerPos, PlayerRot);
@@ -16,7 +16,7 @@ void UGripCraftUnrealSaveGame::Save(ABlockTerrainManager& BlockTerrainManager, F
 	UGameplayStatics::SaveDataToSlot(Archive, DefaultSlotName, DefaultUserIndex);
 }
 
-bool UGripCraftUnrealSaveGame::Load(ABlockTerrainManager& BlockTerrainManager, FVector& PlayerPos, FRotator& PlayerRot)
+bool FGripCraftUnrealSaveGame::Load(ABlockTerrainManager& BlockTerrainManager, FVector& PlayerPos, FRotator& PlayerRot)
 {
 	if (UGameplayStatics::DoesSaveGameExist(DefaultSlotName, DefaultUserIndex) == false)
 		return false;
@@ -30,7 +30,7 @@ bool UGripCraftUnrealSaveGame::Load(ABlockTerrainManager& BlockTerrainManager, F
 	return true;
 }
 
-void UGripCraftUnrealSaveGame::SaveLoad(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager, FVector& PlayerPos, FRotator& PlayerRot)
+void FGripCraftUnrealSaveGame::SaveLoad(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager, FVector& PlayerPos, FRotator& PlayerRot)
 {
 	Ar << BlockTerrainManager;
 	Ar << PlayerPos;

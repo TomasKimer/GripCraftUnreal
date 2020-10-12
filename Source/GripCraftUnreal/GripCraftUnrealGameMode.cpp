@@ -31,7 +31,7 @@ void AGripCraftUnrealGameMode::StartPlay()
 	FVector playerLocation;
 	FRotator playerRotation;
 
-	if (UGripCraftUnrealSaveGame::Load(*BlockTerrainManager, playerLocation, playerRotation) == true)
+	if (FGripCraftUnrealSaveGame::Load(*BlockTerrainManager, playerLocation, playerRotation) == true)
 	{
 		playerPawn->SetActorLocation(playerLocation);
 		playerPawn->SetActorRotation(playerRotation);
