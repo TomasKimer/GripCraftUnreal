@@ -8,7 +8,7 @@
 #include "BlockTerrainSubsystem.generated.h"
 
 UCLASS()
-class GRIPCRAFTUNREAL_API UBlockTerrainSubsystem : public UWorldSubsystem
+class GRIPCRAFTUNREAL_API UBlockTerrainSubsystem final : public UWorldSubsystem
 {
 	GENERATED_BODY()
 

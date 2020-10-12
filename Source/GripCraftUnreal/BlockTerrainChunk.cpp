@@ -15,12 +15,10 @@ ABlockTerrainChunk::ABlockTerrainChunk()
 	RootComponent = ProceduralMeshComponent;
 }
 
-
 ABlockTerrainChunk::~ABlockTerrainChunk()
 {
 	delete BlockData;
 }
-
 
 void ABlockTerrainChunk::Initialize(int width, int height, UBlockSettings* blockSettings, TArray3D<FBlockData>* blockData)
 {
@@ -42,7 +40,6 @@ void ABlockTerrainChunk::Initialize(int width, int height, UBlockSettings* block
 		bChanged = true;
 	}
 }
-
 
 void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
 {
@@ -67,7 +64,6 @@ void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale,
 	}
 }
 
-
 void ABlockTerrainChunk::SetBlock(int X, int Y, int Z, EBlockType BlockType)
 {
 	if (CheckBounds(X, Y, Z) == false)
@@ -85,7 +81,6 @@ void ABlockTerrainChunk::SetBlock(int X, int Y, int Z, EBlockType BlockType)
 
 	bChanged = true;
 }
-
 
 void ABlockTerrainChunk::DamageBlock(int X, int Y, int Z, float Damage)
 {
@@ -113,7 +108,6 @@ void ABlockTerrainChunk::DamageBlock(int X, int Y, int Z, float Damage)
 
 	bChanged = true;
 }
-
 
 void ABlockTerrainChunk::UpdateMesh() const
 {
@@ -200,14 +194,13 @@ void ABlockTerrainChunk::UpdateMesh() const
 	TArray<FProcMeshTangent> tangents;
 	TArray<FLinearColor> vertexColors;
 
-	// TODO this is not needed, it looks worse (and is way toooo slow)
+	// TODO looks like this is not needed, it looks worse and is way toooo slow
 //	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, uvs, normals, tangents);
 
 	ProceduralMeshComponent->ClearMeshSection(0);
 	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, vertices, triangles, normals, uvs, vertexColors, tangents, true);
 	ProceduralMeshComponent->SetMaterial(0, Material);
 }
-
 
 TArray3D<FBlockData>* ABlockTerrainChunk::TakeBlockData()
 {
@@ -216,7 +209,6 @@ TArray3D<FBlockData>* ABlockTerrainChunk::TakeBlockData()
 
 	return data;
 }
-
 
 int ABlockTerrainChunk::GetTerrainHeight(int X, int Y, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
 {
@@ -230,7 +222,6 @@ int ABlockTerrainChunk::GetTerrainHeight(int X, int Y, float NoiseScale, FVector
 
 	return result;
 }
-
 
 EBlockType ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) const
 {
@@ -249,7 +240,6 @@ EBlockType ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHe
 	return EBlockType::Snow;
 }
 
-
 void ABlockTerrainChunk::AddFaceVertices(TArray<FVector>& Vertices, const FVector& Origin, const TArray<FVector>& VerticesToAdd) const
 {
 	for (int idx = 0; idx < VerticesToAdd.Num(); ++idx)
@@ -258,7 +248,6 @@ void ABlockTerrainChunk::AddFaceVertices(TArray<FVector>& Vertices, const FVecto
 	}
 }
 
-
 bool ABlockTerrainChunk::IsNone(int X, int Y, int Z) const
 {
 	if (CheckBounds(X, Y, Z) == false)
@@ -266,7 +255,6 @@ bool ABlockTerrainChunk::IsNone(int X, int Y, int Z) const
 
 	return BlockData->Get(X, Y, Z).BlockType == EBlockType::None;
 }
-
 
 bool ABlockTerrainChunk::CheckBounds(int X, int Y, int Z) const
 {

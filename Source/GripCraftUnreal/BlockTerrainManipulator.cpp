@@ -18,7 +18,6 @@ ABlockTerrainManipulator::ABlockTerrainManipulator()
 	RootComponent = ProceduralMeshComponent;
 }
 
-
 void ABlockTerrainManipulator::BeginPlay()
 {
 	Super::BeginPlay();
@@ -26,7 +25,6 @@ void ABlockTerrainManipulator::BeginPlay()
 	CreateBlock();
 	UpdateSelectedBlock(true);
 }
-
 
 void ABlockTerrainManipulator::ChangeBlock(int direction)
 {
@@ -47,12 +45,10 @@ void ABlockTerrainManipulator::ChangeBlock(int direction)
 	}
 }
 
-
 void ABlockTerrainManipulator::PlaceCurrentBlock()
 {
 	bPlaceCurrentBlock = true;
 }
-
 
 void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
 {
@@ -103,7 +99,6 @@ void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
 	bPlaceCurrentBlock = false;
 }
 
-
 void ABlockTerrainManipulator::CreateBlock()
 {
 	const int FACE_COUNT        = 6;
@@ -148,7 +143,6 @@ void ABlockTerrainManipulator::CreateBlock()
 	ProceduralMeshComponent->SetMaterial(0, Material);
 }
 
-
 void ABlockTerrainManipulator::UpdateUVs(EBlockType BlockType)
 {
 	if (UVsSetForBlock == BlockType)
@@ -173,7 +167,6 @@ void ABlockTerrainManipulator::UpdateUVs(EBlockType BlockType)
 	UVs.Empty();
 }
 
-
 void ABlockTerrainManipulator::UpdateSelectedBlock(bool bVisible)
 {
 	EBlockType selectedBlock = GetSelectedBlock();
@@ -187,7 +180,6 @@ void ABlockTerrainManipulator::UpdateSelectedBlock(bool bVisible)
 		Show(bVisible);
 	}
 }
-
 
 void ABlockTerrainManipulator::Show(bool bVisible) const
 {

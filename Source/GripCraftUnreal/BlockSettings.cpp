@@ -65,10 +65,9 @@ TSharedPtr<UBlockSettings::FBlockInfo> UBlockSettings::GetBlockInfo(EBlockType b
     ));
 
     CachedBlockInfos.Add(blockType, newBlockInfo);
-    
+
     return newBlockInfo;
 }
-
 
 TArray<FVector2D> UBlockSettings::GetUVs(ETile tile) const
 {

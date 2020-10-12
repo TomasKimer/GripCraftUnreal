@@ -6,7 +6,6 @@
 #include "BlockTerrainSubsystem.h"
 #include "EngineUtils.h"
 #include "GripCraftUnrealHUD.h"
-#include "GripCraftUnrealCharacter.h"
 #include "GripCraftUnrealSaveGame.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -20,7 +19,6 @@ AGripCraftUnrealGameMode::AGripCraftUnrealGameMode()
 	// use our custom HUD class
 	HUDClass = AGripCraftUnrealHUD::StaticClass();
 }
-
 
 void AGripCraftUnrealGameMode::StartPlay()
 {

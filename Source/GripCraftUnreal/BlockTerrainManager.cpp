@@ -13,13 +13,11 @@ ABlockTerrainManager::ABlockTerrainManager()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-
 ABlockTerrainManager::~ABlockTerrainManager()
 {
 	for (const auto& pair : CachedBlockData)
 		delete pair.Value;
 }
-
 
 void ABlockTerrainManager::BeginPlay()
 {
@@ -30,14 +28,12 @@ void ABlockTerrainManager::BeginPlay()
 	UpdateNoiseType();
 }
 
-
 void ABlockTerrainManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	UpdateChunks();
 }
-
 
 FVector ABlockTerrainManager::GetOptimalPlayerSpawnLocation() const
 {
@@ -47,7 +43,6 @@ FVector ABlockTerrainManager::GetOptimalPlayerSpawnLocation() const
 		(ChunkHeight + 1) * BlockSettings->BlockSize
 	);
 }
-
 
 void ABlockTerrainManager::AddBlock(FVector AddBlockPosition, EBlockType BlockType)
 {
@@ -59,12 +54,11 @@ void ABlockTerrainManager::AddBlock(FVector AddBlockPosition, EBlockType BlockTy
 
 	FIntVector positionInChunk = GetPositionInChunk(chunkPosition, AddBlockPosition);
 
-	UE_LOG(LogTemp, Display, TEXT("Add block, Chunk pos: %s, BlockPos: %s, BlockType: %d"),
-            *chunkPosition.ToString(), *positionInChunk.ToString(), BlockType);
+//	UE_LOG(LogTemp, Display, TEXT("Add block, Chunk pos: %s, BlockPos: %s, BlockType: %d"),
+//            *chunkPosition.ToString(), *positionInChunk.ToString(), BlockType);
 
 	(*chunk)->SetBlock(positionInChunk.X, positionInChunk.Y, positionInChunk.Z, BlockType);
 }
-
 
 void ABlockTerrainManager::DamageBlock(FVector HitPosition, FVector HitNormal, float Damage)
 {
@@ -77,12 +71,11 @@ void ABlockTerrainManager::DamageBlock(FVector HitPosition, FVector HitNormal, f
 
 	FIntVector positionInChunk = GetPositionInChunk(chunkPosition, damageBlockPosition);
 
-	UE_LOG(LogTemp, Display, TEXT("Damage block, Chunk pos: %s, BlockPos: %s, Damage: %f, Normal: %s"),
-            *chunkPosition.ToString(), *positionInChunk.ToString(), Damage, *HitNormal.ToString());
+//	UE_LOG(LogTemp, Display, TEXT("Damage block, Chunk pos: %s, BlockPos: %s, Damage: %f, Normal: %s"),
+//            *chunkPosition.ToString(), *positionInChunk.ToString(), Damage, *HitNormal.ToString());
 
 	(*chunk)->DamageBlock(positionInChunk.X, positionInChunk.Y, positionInChunk.Z, Damage);
 }
-
 
 void ABlockTerrainManager::UpdateChunks()
 {
@@ -97,7 +90,6 @@ void ABlockTerrainManager::UpdateChunks()
 	RemoveFarChunks();
 	CreateNewChunks();
 }
-
 
 void ABlockTerrainManager::CreateNewChunks()
 {
@@ -114,7 +106,6 @@ void ABlockTerrainManager::CreateNewChunks()
 		}
 	}
 }
-
 
 void ABlockTerrainManager::RemoveFarChunks()
 {
@@ -142,7 +133,6 @@ void ABlockTerrainManager::RemoveFarChunks()
 		ActiveChunks.Remove(chunkToRemove);
 	}
 }
-
 
 ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint ChunkPos)
 {
@@ -193,7 +183,6 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint ChunkPos)
 	return newChunk;
 }
 
-
 FIntVector ABlockTerrainManager::GetPositionInChunk(FIntPoint ChunkPosition, FVector TargetPosition) const
 {
 	return FIntVector(
@@ -203,7 +192,6 @@ FIntVector ABlockTerrainManager::GetPositionInChunk(FIntPoint ChunkPosition, FVe
     );
 }
 
-
 FIntPoint ABlockTerrainManager::GetChunkPosition(FVector Position) const
 {
 	return FIntPoint(
@@ -211,7 +199,6 @@ FIntPoint ABlockTerrainManager::GetChunkPosition(FVector Position) const
 		FMath::FloorToInt(Position.Y / (ChunkWidth * BlockSettings->BlockSize))
 	);
 }
-
 
 FVector ABlockTerrainManager::GetPlayerLocation() const  // SP only, but it's enough for now
 {
@@ -226,12 +213,10 @@ FVector ABlockTerrainManager::GetPlayerLocation() const  // SP only, but it's en
 	return PlayerPawn->GetActorLocation();
 }
 
-
 void ABlockTerrainManager::UpdateNoiseType()
 {
 	NoiseLib.SetNoiseType(ConvertNoiseType(NoiseType));
 }
-
 
 FastNoiseLite::NoiseType ABlockTerrainManager::ConvertNoiseType(ENoiseType NoiseType)
 {
@@ -246,7 +231,6 @@ FastNoiseLite::NoiseType ABlockTerrainManager::ConvertNoiseType(ENoiseType Noise
 	default: checkNoEntry();        return FastNoiseLite::NoiseType_Perlin;
 	}
 }
-
 
 FArchive& operator<<(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager)
 {

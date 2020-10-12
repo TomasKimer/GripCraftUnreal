@@ -6,7 +6,6 @@
 #include "BlockTerrainManager.h"
 #include "Serialization/BufferArchive.h"
 
-
 class FGripCraftUnrealSaveGame
 {
 	static void SaveLoad(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager, FVector& PlayerPos, FRotator& PlayerRot);

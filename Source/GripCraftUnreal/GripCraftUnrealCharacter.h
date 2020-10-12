@@ -56,7 +56,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	virtual void BeginPlay();
+	virtual void BeginPlay() override;
 
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
@@ -88,7 +88,7 @@ public:
 	uint32 bUsingMotionControllers : 1;
 
 protected:
-	
+
 	/** Fires a projectile. */
 	void OnFire();
 
