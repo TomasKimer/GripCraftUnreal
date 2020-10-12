@@ -84,6 +84,7 @@ private:
 	FIntVector GetPositionInChunk(FIntPoint ChunkPosition, FVector TargetPosition) const;
 	FIntPoint GetChunkPosition(FVector Position) const;
 	FVector GetPlayerLocation() const;
+	void UpdateNoiseType();
 
 	static FastNoiseLite::NoiseType ConvertNoiseType(ENoiseType NoiseType);
 };

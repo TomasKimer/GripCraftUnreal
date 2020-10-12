@@ -27,7 +27,7 @@ void ABlockTerrainManager::BeginPlay()
 
 	GetWorld()->GetSubsystem<UBlockTerrainSubsystem>()->RegisterManager(this);
 
-	NoiseLib.SetNoiseType(ConvertNoiseType(NoiseType));
+	UpdateNoiseType();
 }
 
 
@@ -227,6 +227,12 @@ FVector ABlockTerrainManager::GetPlayerLocation() const  // SP only, but it's en
 }
 
 
+void ABlockTerrainManager::UpdateNoiseType()
+{
+	NoiseLib.SetNoiseType(ConvertNoiseType(NoiseType));
+}
+
+
 FastNoiseLite::NoiseType ABlockTerrainManager::ConvertNoiseType(ENoiseType NoiseType)
 {
 	switch (NoiseType)
@@ -253,6 +259,8 @@ FArchive& operator<<(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager)
 	if (Ar.IsLoading() == true)
 	{
 		Ar << BlockTerrainManager.CachedBlockData;
+
+		BlockTerrainManager.UpdateNoiseType();
 	}
 	else
 	{
