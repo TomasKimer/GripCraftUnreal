@@ -28,35 +28,35 @@ public:
 		return SizeX * SizeY * SizeZ;
 	}
 
-	friend FArchive& operator<<(FArchive& Ar, TArray3D*& Array)
+	friend FArchive& operator<<(FArchive& Ar, TArray3D*& Obj)
 	{
 		if (Ar.IsLoading() == true)
 		{
-			size_t SizeX, SizeY, SizeZ;
+			size_t InSizeX, InSizeY, InSizeZ;
 
-			Ar << SizeX;
-			Ar << SizeY;
-			Ar << SizeZ;
+			Ar << InSizeX;
+			Ar << InSizeY;
+			Ar << InSizeZ;
 
-			if (Array != nullptr)
-				delete Array;
+			if (Obj != nullptr)
+				delete Obj;
 
-			Array = new TArray3D<T>(SizeX, SizeY, SizeZ);
+			Obj = new TArray3D<T>(InSizeX, InSizeY, InSizeZ);
 
-			for (size_t i = 0; i < Array->Num(); ++i)
+			for (size_t i = 0; i < Obj->Num(); ++i)
 			{
-				Ar << Array->Array[i];
+				Ar << Obj->Array[i];
 			}
 		}
 		else
 		{
-			Ar << Array->SizeX;
-			Ar << Array->SizeY;
-			Ar << Array->SizeZ;
+			Ar << Obj->SizeX;
+			Ar << Obj->SizeY;
+			Ar << Obj->SizeZ;
 
-			for (size_t i = 0; i < Array->Num(); ++i)
+			for (size_t i = 0; i < Obj->Num(); ++i)
 			{
-				Ar << Array->Array[i];
+				Ar << Obj->Array[i];
 			}
 		}
 

@@ -177,7 +177,9 @@ ABlockTerrainChunk* ABlockTerrainManager::CreateChunk(FIntPoint ChunkPos)
 	TArray3D<FBlockData>** cachedBlockData = CachedBlockData.Find(ChunkPos);
 
 	newChunk->Initialize(ChunkWidth, ChunkHeight, BlockSettings, cachedBlockData != nullptr ? *cachedBlockData : nullptr);
+#if WITH_EDITOR
 	newChunk->SetActorLabel(FString(TEXT("Chunk ")) + ChunkPos.ToString());
+#endif
 
 	if (cachedBlockData == nullptr)
 	{
