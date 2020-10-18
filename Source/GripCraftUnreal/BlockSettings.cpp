@@ -47,26 +47,36 @@ const TArray<FVector> UBlockSettings::BOTTOM_VERTICES = {
 };
 
 
-TSharedPtr<UBlockSettings::FBlockInfo> UBlockSettings::GetBlockInfo(EBlockType blockType)
+TSharedPtr<UBlockSettings::FBlockInfoMap, ESPMode::ThreadSafe> UBlockSettings::GetBlockInfoMap()
 {
-    TSharedPtr<FBlockInfo>* blockInfo = CachedBlockInfos.Find(blockType);
-    if (blockInfo != nullptr)
-        return *blockInfo;
+    if (CachedBlockInfoMap != nullptr)
+        return CachedBlockInfoMap;
 
+    FBlockInfoMap* Result = new FBlockInfoMap();
+    Result->Reserve(4);
+
+    Result->Add(EBlockType::Grass, CreateBlockInfo(EBlockType::Grass));
+    Result->Add(EBlockType::Dirt, CreateBlockInfo(EBlockType::Dirt));
+    Result->Add(EBlockType::Snow, CreateBlockInfo(EBlockType::Snow));
+    Result->Add(EBlockType::Stone, CreateBlockInfo(EBlockType::Stone));
+
+    CachedBlockInfoMap = MakeShareable(Result);
+
+    return CachedBlockInfoMap;
+}
+
+TSharedPtr<UBlockSettings::FBlockInfo, ESPMode::ThreadSafe> UBlockSettings::CreateBlockInfo(EBlockType blockType) const
+{
     const FBlockSetup* blockSetup = BlockSetup.FindByPredicate([blockType](const FBlockSetup& obj) { return obj.BlockType == blockType; });
     check(blockSetup != nullptr);
 
-    TSharedPtr<FBlockInfo> newBlockInfo = MakeShareable(new FBlockInfo
+    return MakeShareable(new FBlockInfo
     (
         GetUVs(blockSetup->TileTop),
         GetUVs(blockSetup->TileSide),
         GetUVs(blockSetup->TileBottom),
         blockSetup->Health        
     ));
-
-    CachedBlockInfos.Add(blockType, newBlockInfo);
-
-    return newBlockInfo;
 }
 
 TArray<FVector2D> UBlockSettings::GetUVs(ETile tile) const

@@ -6,22 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Array3D.h"
 #include "BlockSettings.h"
+#include "BlockTerrainMeshDataTask.h"
 #include "BlockTerrainChunk.generated.h"
-
-
-struct FBlockData
-{
-	EBlockType BlockType;
-	float Health;
-
-	friend FArchive& operator<<(FArchive& Ar, FBlockData& BlockData)
-	{
-		Ar << BlockData.BlockType;
-		Ar << BlockData.Health;
-
-		return Ar;
-	}
-};
 
 
 UCLASS()
@@ -33,14 +19,17 @@ public:
 	ABlockTerrainChunk();
 	~ABlockTerrainChunk();
 
-	void Initialize(int width, int height, UBlockSettings* blockSettings, TArray3D<FBlockData>* blockData = nullptr);
+	void Initialize(int InWidth, int InHeight, /*const*/ UBlockSettings* InBlockSettings, TArray3D<FBlockData>* InBlockData = nullptr);
+	void DeInitialize();
 	void GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, class FastNoiseLite& NoiseLib) const;
 	void SetBlock(int X, int Y, int Z, EBlockType BlockType);
 	void DamageBlock(int X, int Y, int Z, float Damage);
-	void UpdateMesh() const;
+	void UpdateMesh(); //const;
 	FORCEINLINE bool HasChanged() const { return bChanged; }
 	TArray3D<FBlockData>* TakeBlockData();
 	FORCEINLINE TArray3D<FBlockData>* GetBlockData() const { return BlockData; }
+
+	virtual void Tick(float DeltaSeconds) override;
 
 private:
 	UPROPERTY(VisibleDefaultsOnly)
@@ -49,16 +38,20 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	class UMaterialInterface* Material;
 
+	UPROPERTY(EditDefaultsOnly)
+	bool bUseAsyncGeneration = true;
+
 	UPROPERTY()
-	UBlockSettings* BlockSettings;
+	UBlockSettings* BlockSettings; //const
 
 	int Width, Height;
 	bool bChanged = false;
 	TArray3D<FBlockData>* BlockData;
+	FAsyncTask<FBlockTerrainMeshDataTask>* MeshDataTask;
 
+	void TryFinishMeshDataTask();
+	void TryCancelMeshDataTask();
 	int GetTerrainHeight(int X, int Y, float NoiseScale, FVector2D NoiseOffset, class FastNoiseLite& NoiseLib) const;
 	EBlockType GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) const;
-	void AddFaceVertices(TArray<FVector>& Vertices, const FVector& Origin, const TArray<FVector>& VerticesToAdd) const;
-	bool IsNone(int X, int Y, int Z) const;
 	bool CheckBounds(int X, int Y, int Z) const;
 };

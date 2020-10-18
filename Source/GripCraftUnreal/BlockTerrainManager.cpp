@@ -40,7 +40,7 @@ FVector ABlockTerrainManager::GetOptimalPlayerSpawnLocation() const
 	return FVector(
 		ChunkWidth * BlockSettings->BlockSize / 2.0f,
 		ChunkWidth * BlockSettings->BlockSize / 2.0f,
-		(ChunkHeight + 1) * BlockSettings->BlockSize
+		(ChunkHeight + 1) * BlockSettings->BlockSize // + 9999
 	);
 }
 
@@ -79,7 +79,11 @@ void ABlockTerrainManager::DamageBlock(FVector HitPosition, FVector HitNormal, f
 
 void ABlockTerrainManager::UpdateChunks()
 {
-	const FIntPoint playerChunkPosition = GetChunkPosition(GetPlayerLocation());
+	FVector playerLocation;
+	if (GetPlayerLocation(playerLocation) == false)
+		return;
+	
+	const FIntPoint playerChunkPosition = GetChunkPosition(playerLocation);
 	if (playerChunkPosition == PlayerChunkPosition)
 		return;
 
@@ -93,6 +97,8 @@ void ABlockTerrainManager::UpdateChunks()
 
 void ABlockTerrainManager::CreateNewChunks()
 {
+//	double startTime = FPlatformTime::Seconds();
+
 	for (int x = PlayerChunkPosition.X - ChunkDistance; x <= PlayerChunkPosition.X + ChunkDistance; ++x)
 	{
 		for (int y = PlayerChunkPosition.Y - ChunkDistance; y <= PlayerChunkPosition.Y + ChunkDistance; ++y)
@@ -105,6 +111,8 @@ void ABlockTerrainManager::CreateNewChunks()
 			}
 		}
 	}
+
+//	UE_LOG(LogTemp, Warning, TEXT("Create new chunks took %f seconds"), FPlatformTime::Seconds() - startTime);
 }
 
 void ABlockTerrainManager::RemoveFarChunks()
@@ -124,6 +132,8 @@ void ABlockTerrainManager::RemoveFarChunks()
 	for (const FIntPoint& chunkToRemove : chunksToRemove)
 	{
 		ABlockTerrainChunk* chunk = ActiveChunks[chunkToRemove];
+		chunk->DeInitialize();
+
 		if (chunk->HasChanged() == true)
 		{
 			CachedBlockData.Add(chunkToRemove, chunk->TakeBlockData());
@@ -200,17 +210,18 @@ FIntPoint ABlockTerrainManager::GetChunkPosition(FVector Position) const
 	);
 }
 
-FVector ABlockTerrainManager::GetPlayerLocation() const  // SP only, but it's enough for now
+bool ABlockTerrainManager::GetPlayerLocation(FVector& OutLocation) const  // SP only, but it's enough for now
 {
 	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController == nullptr)
-		return FVector();
+		return false;
 
 	APawn* PlayerPawn = PlayerController->GetPawn();
 	if (PlayerPawn == nullptr)
-		return FVector();
+		return false;
 
-	return PlayerPawn->GetActorLocation();
+	OutLocation = PlayerPawn->GetActorLocation();
+	return true;
 }
 
 void ABlockTerrainManager::UpdateNoiseType()

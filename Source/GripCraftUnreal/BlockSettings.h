@@ -87,6 +87,8 @@ public:
 		}
 	};
 
+	typedef TMap<EBlockType, TSharedPtr<FBlockInfo, ESPMode::ThreadSafe>> FBlockInfoMap;
+
 	static const TArray<FVector> LEFT_VERTICES;
 	static const TArray<FVector> RIGHT_VERTICES;
 	static const TArray<FVector> FRONT_VERTICES;
@@ -97,7 +99,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Blocks", meta = (ClampMin = "10", ClampMax = "1000", DisplayName="BlockSize [cm]"))
 	int BlockSize = 100;
 
-	TSharedPtr<FBlockInfo> GetBlockInfo(EBlockType blockType);
+	TSharedPtr<FBlockInfoMap, ESPMode::ThreadSafe> GetBlockInfoMap();
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Blocks")
@@ -109,7 +111,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Tiles")
 	TArray<FTileSetup> TileSetup;
 
-	TMap<EBlockType, TSharedPtr<FBlockInfo>> CachedBlockInfos;
+	TSharedPtr<FBlockInfoMap, ESPMode::ThreadSafe> CachedBlockInfoMap;
 
+	TSharedPtr<FBlockInfo, ESPMode::ThreadSafe> CreateBlockInfo(EBlockType blockType) const;
 	TArray<FVector2D> GetUVs(ETile tile) const;
 };

@@ -153,7 +153,7 @@ void ABlockTerrainManipulator::UpdateUVs(EBlockType BlockType)
 	TArray<FProcMeshTangent> tangents;
 	TArray<FLinearColor> vertexColors;
 
-	const TSharedPtr<UBlockSettings::FBlockInfo> blockInfo = BlockSettings->GetBlockInfo(BlockType);
+	const auto& blockInfo = (*BlockSettings->GetBlockInfoMap())[BlockType];
 
 	UVs.Append(blockInfo->SideUVs);
 	UVs.Append(blockInfo->SideUVs);

@@ -5,11 +5,13 @@
 #include "ProceduralMeshComponent.h"
 #include "FastNoiseLite.h"
 #include "BlockSettings.h"
+#include "HAL/ThreadManager.h"
+#include "Kismet/GameplayStatics.h"
 
 
 ABlockTerrainChunk::ABlockTerrainChunk()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	ProceduralMeshComponent = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProceduralMeshComponent"));
 	RootComponent = ProceduralMeshComponent;
@@ -17,28 +19,42 @@ ABlockTerrainChunk::ABlockTerrainChunk()
 
 ABlockTerrainChunk::~ABlockTerrainChunk()
 {
+	TryCancelMeshDataTask();
+
 	delete BlockData;
 }
 
-void ABlockTerrainChunk::Initialize(int width, int height, UBlockSettings* blockSettings, TArray3D<FBlockData>* blockData)
+void ABlockTerrainChunk::Tick(float DeltaSeconds)
 {
-	Width = width;
-	Height = height;
-	BlockSettings = blockSettings;
+	TryFinishMeshDataTask();
+}
+
+void ABlockTerrainChunk::Initialize(int InWidth, int InHeight, /*const*/ UBlockSettings* InBlockSettings, TArray3D<FBlockData>* InBlockData)
+{
+	Width = InWidth;
+	Height = InHeight;
+	BlockSettings = InBlockSettings;
 
 	if (BlockData != nullptr)
 		delete BlockData;
 
-	if (blockData == nullptr)
+	if (InBlockData == nullptr)
 	{
 		BlockData = new TArray3D<FBlockData>(Width, Width, Height);
 		bChanged = false;
 	}
 	else
 	{
-		BlockData = blockData;
+		BlockData = InBlockData;
 		bChanged = true;
 	}
+}
+
+void ABlockTerrainChunk::DeInitialize()
+{
+	ProceduralMeshComponent->SetMeshSectionVisible(0, false);
+
+	TryCancelMeshDataTask();
 }
 
 void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
@@ -57,7 +73,7 @@ void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale,
 
 				if (blockType != EBlockType::None)
 				{
-					BlockData->Get(x, y, z).Health = BlockSettings->GetBlockInfo(blockType)->Health;
+					BlockData->Get(x, y, z).Health = (*BlockSettings->GetBlockInfoMap())[blockType]->Health;
 				}
 			}
 		}
@@ -75,7 +91,7 @@ void ABlockTerrainChunk::SetBlock(int X, int Y, int Z, EBlockType BlockType)
 	}
 
 	BlockData->Get(X, Y, Z).BlockType = BlockType;
-	BlockData->Get(X, Y, Z).Health    = BlockSettings->GetBlockInfo(BlockType)->Health;
+	BlockData->Get(X, Y, Z).Health    = (*BlockSettings->GetBlockInfoMap())[BlockType]->Health;
 
 	UpdateMesh();
 
@@ -109,97 +125,20 @@ void ABlockTerrainChunk::DamageBlock(int X, int Y, int Z, float Damage)
 	bChanged = true;
 }
 
-void ABlockTerrainChunk::UpdateMesh() const
+void ABlockTerrainChunk::UpdateMesh()
 {
-	const int VERTICES_PER_FACE = 4;
+	TryCancelMeshDataTask();
 
-	TArray<FVector> vertices;
-	TArray<int32> triangles;
-	TArray<FVector2D> uvs;
+	MeshDataTask = new FAsyncTask<FBlockTerrainMeshDataTask>(Width, Height,  BlockSettings->BlockSize, BlockData, BlockSettings->GetBlockInfoMap());
 
-	for (int x = 0; x < Width; ++x)
+	if (bUseAsyncGeneration == true)
 	{
-		for (int y = 0; y < Width; ++y)
-		{
-			for (int z = 0; z < Height; ++z)
-			{
-				EBlockType blockType = BlockData->Get(x, y, z).BlockType;
-				if (blockType == EBlockType::None)
-					continue;
-
-				const TSharedPtr<UBlockSettings::FBlockInfo> blockInfo = BlockSettings->GetBlockInfo(blockType);
-				int faceCount = 0;
-				FVector pos(x, y, z);
-
-				if (IsNone(x - 1, y, z))
-				{
-					AddFaceVertices(vertices, pos, UBlockSettings::LEFT_VERTICES);
-					uvs.Append(blockInfo->SideUVs);
-					faceCount += 1;
-				}
-
-				if (IsNone(x + 1, y, z))
-				{
-					AddFaceVertices(vertices, pos, UBlockSettings::RIGHT_VERTICES);
-					uvs.Append(blockInfo->SideUVs);
-					faceCount += 1;
-				}
-
-				if (IsNone(x, y, z - 1))
-				{
-					AddFaceVertices(vertices, pos, UBlockSettings::BOTTOM_VERTICES);
-					uvs.Append(blockInfo->BottomUVs);
-					faceCount += 1;
-				}
-
-				if (IsNone(x, y, z + 1))
-				{
-					AddFaceVertices(vertices, pos, UBlockSettings::TOP_VERTICES);
-					uvs.Append(blockInfo->TopUVs);
-					faceCount += 1;
-				}
-
-				if (IsNone(x, y + 1, z))
-				{
-					AddFaceVertices(vertices, pos, UBlockSettings::BACK_VERTICES);
-					uvs.Append(blockInfo->SideUVs);
-					faceCount += 1;
-				}
-
-				if (IsNone(x, y - 1, z))
-				{
-					AddFaceVertices(vertices, pos, UBlockSettings::FRONT_VERTICES);
-					uvs.Append(blockInfo->SideUVs);
-					faceCount += 1;
-				}
-
-				int startIdx = vertices.Num() - faceCount * VERTICES_PER_FACE;
-				for (int i = 0; i < faceCount; ++i)
-				{
-					int idx = startIdx + i * VERTICES_PER_FACE;
-
-					triangles.Add(idx);
-					triangles.Add(idx + 1);
-					triangles.Add(idx + 2);
-
-					triangles.Add(idx);
-					triangles.Add(idx + 2);
-					triangles.Add(idx + 3);
-				}
-			}
-		}
+		MeshDataTask->StartBackgroundTask();
 	}
-
-	TArray<FVector> normals;
-	TArray<FProcMeshTangent> tangents;
-	TArray<FLinearColor> vertexColors;
-
-	// TODO looks like this is not needed, it looks worse and is way toooo slow
-//	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(vertices, triangles, uvs, normals, tangents);
-
-	ProceduralMeshComponent->ClearMeshSection(0);
-	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, vertices, triangles, normals, uvs, vertexColors, tangents, true);
-	ProceduralMeshComponent->SetMaterial(0, Material);
+	else
+	{
+		MeshDataTask->StartSynchronousTask();
+	}
 }
 
 TArray3D<FBlockData>* ABlockTerrainChunk::TakeBlockData()
@@ -208,6 +147,38 @@ TArray3D<FBlockData>* ABlockTerrainChunk::TakeBlockData()
 	BlockData = nullptr;
 
 	return data;
+}
+
+void ABlockTerrainChunk::TryFinishMeshDataTask()
+{
+	if (MeshDataTask == nullptr)
+		return;
+	if (MeshDataTask->IsDone() == false)
+		return;
+
+	const FBlockTerrainMeshDataTask CompletedTask = MeshDataTask->GetTask();
+
+	ProceduralMeshComponent->ClearMeshSection(0);
+	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, CompletedTask.Vertices, CompletedTask.Triangles, CompletedTask.Normals, CompletedTask.UVs, CompletedTask.VertexColors, CompletedTask.Tangents, true);
+	ProceduralMeshComponent->SetMaterial(0, Material);
+	ProceduralMeshComponent->SetMeshSectionVisible(0, true);
+
+	delete MeshDataTask;
+	MeshDataTask = nullptr;
+}
+
+void ABlockTerrainChunk::TryCancelMeshDataTask()
+{
+	if (MeshDataTask == nullptr)
+		return;
+
+	if (MeshDataTask->Cancel() == false)
+	{
+		MeshDataTask->EnsureCompletion(false);
+	}
+
+	delete MeshDataTask;
+	MeshDataTask = nullptr;
 }
 
 int ABlockTerrainChunk::GetTerrainHeight(int X, int Y, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
@@ -238,22 +209,6 @@ EBlockType ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHe
 		return EBlockType::Grass;
 
 	return EBlockType::Snow;
-}
-
-void ABlockTerrainChunk::AddFaceVertices(TArray<FVector>& Vertices, const FVector& Origin, const TArray<FVector>& VerticesToAdd) const
-{
-	for (int idx = 0; idx < VerticesToAdd.Num(); ++idx)
-	{
-		Vertices.Add((Origin + VerticesToAdd[idx]) * BlockSettings->BlockSize);
-	}
-}
-
-bool ABlockTerrainChunk::IsNone(int X, int Y, int Z) const
-{
-	if (CheckBounds(X, Y, Z) == false)
-		return true;
-
-	return BlockData->Get(X, Y, Z).BlockType == EBlockType::None;
 }
 
 bool ABlockTerrainChunk::CheckBounds(int X, int Y, int Z) const

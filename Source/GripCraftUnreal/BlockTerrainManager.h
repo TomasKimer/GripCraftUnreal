@@ -83,7 +83,7 @@ private:
 	ABlockTerrainChunk* CreateChunk(FIntPoint ChunkPos);
 	FIntVector GetPositionInChunk(FIntPoint ChunkPosition, FVector TargetPosition) const;
 	FIntPoint GetChunkPosition(FVector Position) const;
-	FVector GetPlayerLocation() const;
+	bool GetPlayerLocation(FVector& OutLocation) const;
 	void UpdateNoiseType();
 
 	static FastNoiseLite::NoiseType ConvertNoiseType(ENoiseType NoiseType);
