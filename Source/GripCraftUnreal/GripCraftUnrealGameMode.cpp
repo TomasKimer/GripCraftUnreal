@@ -39,7 +39,7 @@ void AGripCraftUnrealGameMode::StartPlay()
 	}
 	else
 	{
-		const FVector OptimalSpawnActorLocation = BlockTerrainManager->GetOptimalPlayerSpawnLocation();
+		const FVector& OptimalSpawnActorLocation = BlockTerrainManager->GetOptimalPlayerSpawnLocation();
 
 		PlayerPawn->SetActorLocation(OptimalSpawnActorLocation);
 	}

@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "BlockSettings.h"
+#include "BlockType.h"
 #include "BlockTerrainManipulator.generated.h"
+
+class UBlockSettings;
 
 UCLASS()
 class GRIPCRAFTUNREAL_API ABlockTerrainManipulator final : public AActor
@@ -15,9 +17,9 @@ class GRIPCRAFTUNREAL_API ABlockTerrainManipulator final : public AActor
 public:	
 	ABlockTerrainManipulator();
 
-	void ChangeBlock(int direction);
+	void ChangeBlock(int Direction);
 	void PlaceCurrentBlock();
-	void Update(FVector ViewOrigin, FVector ViewDirection);
+	void Update(const FVector& ViewOrigin, const FVector& ViewDirection);
 
 protected:
 	virtual void BeginPlay() override;
@@ -46,8 +48,8 @@ private:
 	TArray<FVector2D> UVs;
 
 	void CreateBlock();
-	void UpdateUVs(EBlockType BlockType);
+	void UpdateUVs(const EBlockType BlockType);
 	void UpdateSelectedBlock(bool bVisible);
-	void Show(bool bVisible) const;
+	void Show(bool bNewVisibility) const;
 	FORCEINLINE EBlockType GetSelectedBlock() const { return BlockVariants[SelectedBlockIndex]; }
 };

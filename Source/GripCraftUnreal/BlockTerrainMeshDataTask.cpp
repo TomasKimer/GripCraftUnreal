@@ -9,7 +9,7 @@ void FBlockTerrainMeshDataTask::DoWork()
 //	double StartTime = FPlatformTime::Seconds();
 //	UE_LOG(LogTemp, Display, TEXT(":::: TASK STARTED Thread=%s Frame=%d"), *FThreadManager::Get().GetThreadName(FPlatformTLS::GetCurrentThreadId()), GFrameCounter);
 
-	static const int VERTICES_PER_FACE = 4;
+	static const int VerticesPerFace = 4;
 
 	for (int x = 0; x < Width; ++x)
 	{
@@ -27,50 +27,50 @@ void FBlockTerrainMeshDataTask::DoWork()
 
 				if (IsNone(x - 1, y, z))
 				{
-					AddFaceVertices(Pos, UBlockSettings::LEFT_VERTICES);
+					AddFaceVertices(Pos, UBlockSettings::LeftVertices);
 					UVs.Append(BlockInfo->SideUVs);
 					FaceCount += 1;
 				}
 
 				if (IsNone(x + 1, y, z))
 				{
-					AddFaceVertices(Pos, UBlockSettings::RIGHT_VERTICES);
+					AddFaceVertices(Pos, UBlockSettings::RightVertices);
 					UVs.Append(BlockInfo->SideUVs);
 					FaceCount += 1;
 				}
 
 				if (IsNone(x, y, z - 1))
 				{
-					AddFaceVertices(Pos, UBlockSettings::BOTTOM_VERTICES);
+					AddFaceVertices(Pos, UBlockSettings::BottomVertices);
 					UVs.Append(BlockInfo->BottomUVs);
 					FaceCount += 1;
 				}
 
 				if (IsNone(x, y, z + 1))
 				{
-					AddFaceVertices(Pos, UBlockSettings::TOP_VERTICES);
+					AddFaceVertices(Pos, UBlockSettings::TopVertices);
 					UVs.Append(BlockInfo->TopUVs);
 					FaceCount += 1;
 				}
 
 				if (IsNone(x, y + 1, z))
 				{
-					AddFaceVertices(Pos, UBlockSettings::BACK_VERTICES);
+					AddFaceVertices(Pos, UBlockSettings::BackVertices);
 					UVs.Append(BlockInfo->SideUVs);
 					FaceCount += 1;
 				}
 
 				if (IsNone(x, y - 1, z))
 				{
-					AddFaceVertices(Pos, UBlockSettings::FRONT_VERTICES);
+					AddFaceVertices(Pos, UBlockSettings::FrontVertices);
 					UVs.Append(BlockInfo->SideUVs);
 					FaceCount += 1;
 				}
 
-				int StartIdx = Vertices.Num() - FaceCount * VERTICES_PER_FACE;
+				int StartIdx = Vertices.Num() - FaceCount * VerticesPerFace;
 				for (int i = 0; i < FaceCount; ++i)
 				{
-					int Idx = StartIdx + i * VERTICES_PER_FACE;
+					int Idx = StartIdx + i * VerticesPerFace;
 
 					Triangles.Add(Idx);
 					Triangles.Add(Idx + 1);

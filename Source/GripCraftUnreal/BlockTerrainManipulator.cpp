@@ -3,16 +3,15 @@
 
 #include "BlockTerrainManipulator.h"
 #include "BlockTerrainChunk.h"
-#include "DrawDebugHelpers.h"
+#include "BlockSettings.h"
 #include "ProceduralMeshComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "BlockTerrainManager.h"
-#include "Chaos/PBDCollisionConstraintsContact.h"
+//#include "DrawDebugHelpers.h"
 
 
 ABlockTerrainManipulator::ABlockTerrainManipulator()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	ProceduralMeshComponent = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProceduralMeshComponent"));
 	RootComponent = ProceduralMeshComponent;
@@ -26,14 +25,14 @@ void ABlockTerrainManipulator::BeginPlay()
 	UpdateSelectedBlock(true);
 }
 
-void ABlockTerrainManipulator::ChangeBlock(int direction)
+void ABlockTerrainManipulator::ChangeBlock(int Direction)
 {
-	if (direction == 0)
+	if (Direction == 0)
 		return;
 
-	direction = FMath::Clamp(direction, -1, 1);
+	Direction = FMath::Clamp(Direction, -1, 1);
 
-	SelectedBlockIndex += direction;
+	SelectedBlockIndex += Direction;
 
 	if (SelectedBlockIndex < 0)
 	{
@@ -50,44 +49,43 @@ void ABlockTerrainManipulator::PlaceCurrentBlock()
 	bPlaceCurrentBlock = true;
 }
 
-void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
+void ABlockTerrainManipulator::Update(const FVector& ViewOrigin, const FVector& ViewDirection)
 {
-	EBlockType selectedBlock = GetSelectedBlock();
-	if (selectedBlock == EBlockType::None)
+	EBlockType SelectedBlock = GetSelectedBlock();
+	if (SelectedBlock == EBlockType::None)
 	{
 		UpdateSelectedBlock(false);
 		bPlaceCurrentBlock = false;
 		return;
 	}
 
-	const FCollisionQueryParams params;
-	FHitResult hitResult;
-	const int blockSize = BlockSettings->BlockSize;
-	const FVector endLocation = ViewOrigin + ViewDirection * MaxRaycastDistance * blockSize;
+	const FCollisionQueryParams Params;
+	FHitResult HitResult;
+	const int BlockSize = BlockSettings->BlockSize;
+	const FVector& EndLocation = ViewOrigin + ViewDirection * MaxRaycastDistance * BlockSize;
 
-	if (GetWorld()->LineTraceSingleByChannel(hitResult, ViewOrigin, endLocation, ECC_GameTraceChannel2, params) == true)
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, ViewOrigin, EndLocation, ECC_GameTraceChannel2, Params) == true)
 	{
-		const FVector hitBlockPosition = hitResult.Location + hitResult.Normal * blockSize * 0.5f;
+		const FVector& HitBlockPosition = HitResult.Location + HitResult.Normal * BlockSize * 0.5f;
 
 //		DrawDebugLine(GetWorld(), hitResult.Location, hitBlockPosition, FColor(0, 255, 0));
 
-		FVector alignedBlockLocation(
-			blockSize * FMath::FloorToInt(hitBlockPosition.X / blockSize),
-			blockSize * FMath::FloorToInt(hitBlockPosition.Y / blockSize),
-			blockSize * FMath::FloorToInt(hitBlockPosition.Z / blockSize)
+		FVector AlignedBlockLocation(
+			BlockSize * FMath::FloorToInt(HitBlockPosition.X / BlockSize),
+			BlockSize * FMath::FloorToInt(HitBlockPosition.Y / BlockSize),
+			BlockSize * FMath::FloorToInt(HitBlockPosition.Z / BlockSize)
 		);
 
-		SetActorLocation(alignedBlockLocation);
+		SetActorLocation(AlignedBlockLocation);
 		UpdateSelectedBlock(true);
 
 		if (bPlaceCurrentBlock == true)
 		{
-			const AActor* hitActor = hitResult.Actor.Get(); // a weak pointer to the Actor that the trace hit
-			ABlockTerrainManager* blockTerrainManager = Cast<ABlockTerrainManager>(hitActor->GetAttachParentActor());
+			ABlockTerrainManager* BlockTerrainManager = Cast<ABlockTerrainManager>(HitResult.Actor->GetAttachParentActor());
 
-			if (blockTerrainManager != nullptr)
+			if (BlockTerrainManager != nullptr)
 			{
-				blockTerrainManager->AddBlock(hitBlockPosition, selectedBlock);
+				BlockTerrainManager->AddBlock(HitBlockPosition, SelectedBlock);
 			}
 		}
 	}
@@ -101,90 +99,90 @@ void ABlockTerrainManipulator::Update(FVector ViewOrigin, FVector ViewDirection)
 
 void ABlockTerrainManipulator::CreateBlock()
 {
-	const int FACE_COUNT        = 6;
-	const int INDICES_PER_FACE  = 6;
-	const int VERTICES_PER_FACE = 4;
-	const int VERTEX_COUNT      = FACE_COUNT * VERTICES_PER_FACE;
-	const int INDEX_COUNT       = FACE_COUNT * INDICES_PER_FACE;
+	const int FaceCount       = 6;
+	const int IndicesPerFace  = 6;
+	const int VerticesPerFace = 4;
+	const int VertexCount     = FaceCount * VerticesPerFace;
+	const int IndexCount      = FaceCount * IndicesPerFace;
 
-	Vertices.Reserve(VERTEX_COUNT);
-	Vertices.Append(UBlockSettings::LEFT_VERTICES);
-	Vertices.Append(UBlockSettings::RIGHT_VERTICES);
-	Vertices.Append(UBlockSettings::FRONT_VERTICES);
-	Vertices.Append(UBlockSettings::BACK_VERTICES);
-	Vertices.Append(UBlockSettings::TOP_VERTICES);
-	Vertices.Append(UBlockSettings::BOTTOM_VERTICES);
+	Vertices.Reserve(VertexCount);
+	Vertices.Append(UBlockSettings::LeftVertices);
+	Vertices.Append(UBlockSettings::RightVertices);
+	Vertices.Append(UBlockSettings::FrontVertices);
+	Vertices.Append(UBlockSettings::BackVertices);
+	Vertices.Append(UBlockSettings::TopVertices);
+	Vertices.Append(UBlockSettings::BottomVertices);
 
 	for (FVector& v : Vertices)
 	{
 		v *= BlockSettings->BlockSize;
 	}
 
-	Triangles.Reserve(INDEX_COUNT);
+	Triangles.Reserve(IndexCount);
 
-	for (int i = 0; i < FACE_COUNT; ++i)
+	for (int i = 0; i < FaceCount; ++i)
 	{
-		int32 idx = i * VERTICES_PER_FACE;
+		int32 Idx = i * VerticesPerFace;
 
-		Triangles.Add(idx);
-		Triangles.Add(idx + 1);
-		Triangles.Add(idx + 2);
+		Triangles.Add(Idx);
+		Triangles.Add(Idx + 1);
+		Triangles.Add(Idx + 2);
 
-		Triangles.Add(idx);
-		Triangles.Add(idx + 2);
-		Triangles.Add(idx + 3);
+		Triangles.Add(Idx);
+		Triangles.Add(Idx + 2);
+		Triangles.Add(Idx + 3);
 	}
 
-	TArray<FVector> normals;
-	TArray<FProcMeshTangent> tangents;
-	TArray<FLinearColor> vertexColors;
+	const TArray<FVector> Normals;
+	const TArray<FLinearColor> VertexColors;
+	const TArray<FProcMeshTangent> Tangents;
 
-	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, Vertices, Triangles, normals, UVs, vertexColors, tangents, false);
+	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, Vertices, Triangles, Normals, UVs, VertexColors, Tangents, false);
 	ProceduralMeshComponent->SetMaterial(0, Material);
 }
 
-void ABlockTerrainManipulator::UpdateUVs(EBlockType BlockType)
+void ABlockTerrainManipulator::UpdateUVs(const EBlockType BlockType)
 {
 	if (UVsSetForBlock == BlockType)
 		return;
 	UVsSetForBlock = BlockType;
 
-	TArray<FVector> normals;
-	TArray<FProcMeshTangent> tangents;
-	TArray<FLinearColor> vertexColors;
+	const TArray<FVector> Normals;
+	const TArray<FLinearColor> VertexColors;
+	const TArray<FProcMeshTangent> Tangents;
 
-	const auto& blockInfo = (*BlockSettings->GetBlockInfoMap())[BlockType];
+	const auto& BlockInfo = (*BlockSettings->GetBlockInfoMap())[BlockType];
 
-	UVs.Append(blockInfo->SideUVs);
-	UVs.Append(blockInfo->SideUVs);
-	UVs.Append(blockInfo->SideUVs);
-	UVs.Append(blockInfo->SideUVs);
-	UVs.Append(blockInfo->TopUVs);
-	UVs.Append(blockInfo->BottomUVs);
+	UVs.Append(BlockInfo->SideUVs);
+	UVs.Append(BlockInfo->SideUVs);
+	UVs.Append(BlockInfo->SideUVs);
+	UVs.Append(BlockInfo->SideUVs);
+	UVs.Append(BlockInfo->TopUVs);
+	UVs.Append(BlockInfo->BottomUVs);
 
-	ProceduralMeshComponent->UpdateMeshSection_LinearColor(0, Vertices, normals, UVs, vertexColors, tangents);
+	ProceduralMeshComponent->UpdateMeshSection_LinearColor(0, Vertices, Normals, UVs, VertexColors, Tangents);
 
 	UVs.Empty();
 }
 
 void ABlockTerrainManipulator::UpdateSelectedBlock(bool bVisible)
 {
-	EBlockType selectedBlock = GetSelectedBlock();
-	if (selectedBlock == EBlockType::None)
+	const EBlockType SelectedBlock = GetSelectedBlock();
+	if (SelectedBlock == EBlockType::None)
 	{
 		Show(false);
 	}
 	else
 	{
-		UpdateUVs(selectedBlock);
+		UpdateUVs(SelectedBlock);
 		Show(bVisible);
 	}
 }
 
-void ABlockTerrainManipulator::Show(bool bVisible) const
+void ABlockTerrainManipulator::Show(bool bNewVisibility) const
 {
-	if (ProceduralMeshComponent->IsMeshSectionVisible(0) == bVisible)
+	if (ProceduralMeshComponent->IsMeshSectionVisible(0) == bNewVisibility)
 		return;
 
-	ProceduralMeshComponent->SetMeshSectionVisible(0, bVisible);
+	ProceduralMeshComponent->SetMeshSectionVisible(0, bNewVisibility);
 }

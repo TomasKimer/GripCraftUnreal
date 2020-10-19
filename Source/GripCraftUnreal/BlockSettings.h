@@ -68,23 +68,24 @@ public:
 		TArray<FVector2D> BottomUVs;
 		float             Health;
 
-		FBlockInfo(TArray<FVector2D> topUVs, TArray<FVector2D> sideUVs, TArray<FVector2D> bottomUVs, float health)
+		FBlockInfo(const TArray<FVector2D>&& InTopUVs, const TArray<FVector2D>&& InSideUVs,
+		           const TArray<FVector2D>&& InBottomUVs, const float InHealth)
 		{
-			TopUVs = topUVs;
-			SideUVs = sideUVs;
-			BottomUVs = bottomUVs;
-			Health = health;
+			TopUVs = InTopUVs;
+			SideUVs = InSideUVs;
+			BottomUVs = InBottomUVs;
+			Health = InHealth;
 		}
 	};
 
 	typedef TMap<EBlockType, TSharedPtr<FBlockInfo, ESPMode::ThreadSafe>> FBlockInfoMap;
 
-	static const TArray<FVector> LEFT_VERTICES;
-	static const TArray<FVector> RIGHT_VERTICES;
-	static const TArray<FVector> FRONT_VERTICES;
-	static const TArray<FVector> BACK_VERTICES;
-	static const TArray<FVector> TOP_VERTICES;
-	static const TArray<FVector> BOTTOM_VERTICES;
+	static const TArray<FVector> LeftVertices;
+	static const TArray<FVector> RightVertices;
+	static const TArray<FVector> FrontVertices;
+	static const TArray<FVector> BackVertices;
+	static const TArray<FVector> TopVertices;
+	static const TArray<FVector> BottomVertices;
 
 	UPROPERTY(EditAnywhere, Category = "Blocks", meta = (ClampMin = "10", ClampMax = "1000", DisplayName="BlockSize [cm]"))
 	int BlockSize = 100;
@@ -103,6 +104,6 @@ private:
 
 	TSharedPtr<FBlockInfoMap, ESPMode::ThreadSafe> CachedBlockInfoMap;
 
-	TSharedPtr<FBlockInfo, ESPMode::ThreadSafe> CreateBlockInfo(EBlockType blockType) const;
-	TArray<FVector2D> GetUVs(ETile tile) const;
+	TSharedPtr<FBlockInfo, ESPMode::ThreadSafe> CreateBlockInfo(const EBlockType InBlockType) const;
+	TArray<FVector2D> GetUVs(const ETile InTile) const;
 };

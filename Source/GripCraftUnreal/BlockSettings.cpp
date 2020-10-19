@@ -4,42 +4,42 @@
 #include "BlockSettings.h"
 
 
-const TArray<FVector> UBlockSettings::LEFT_VERTICES = {
+const TArray<FVector> UBlockSettings::LeftVertices = {
     FVector(0, 1, 0),
     FVector(0, 1, 1),
     FVector(0, 0, 1),
     FVector(0, 0, 0),
 };
 
-const TArray<FVector> UBlockSettings::RIGHT_VERTICES = {
+const TArray<FVector> UBlockSettings::RightVertices = {
     FVector(1, 0, 0),
     FVector(1, 0, 1),
     FVector(1, 1, 1),
     FVector(1, 1, 0),
 };
 
-const TArray<FVector> UBlockSettings::FRONT_VERTICES = {
+const TArray<FVector> UBlockSettings::FrontVertices = {
     FVector(0, 0, 0),
     FVector(0, 0, 1),
     FVector(1, 0, 1),
     FVector(1, 0, 0),
 };
 
-const TArray<FVector> UBlockSettings::BACK_VERTICES = {
+const TArray<FVector> UBlockSettings::BackVertices = {
     FVector(1, 1, 0),
     FVector(1, 1, 1),
     FVector(0, 1, 1),
     FVector(0, 1, 0),
 };
 
-const TArray<FVector> UBlockSettings::TOP_VERTICES = {
+const TArray<FVector> UBlockSettings::TopVertices = {
     FVector(0, 0, 1),
     FVector(0, 1, 1),
     FVector(1, 1, 1),
     FVector(1, 0, 1),
 };
 
-const TArray<FVector> UBlockSettings::BOTTOM_VERTICES = {
+const TArray<FVector> UBlockSettings::BottomVertices = {
     FVector(0, 0, 0),
     FVector(1, 0, 0),
     FVector(1, 1, 0),
@@ -65,32 +65,32 @@ TSharedPtr<UBlockSettings::FBlockInfoMap, ESPMode::ThreadSafe> UBlockSettings::G
     return CachedBlockInfoMap;
 }
 
-TSharedPtr<UBlockSettings::FBlockInfo, ESPMode::ThreadSafe> UBlockSettings::CreateBlockInfo(EBlockType blockType) const
+TSharedPtr<UBlockSettings::FBlockInfo, ESPMode::ThreadSafe> UBlockSettings::CreateBlockInfo(const EBlockType InBlockType) const
 {
-    const FBlockSetup* blockSetup = BlockSetup.FindByPredicate([blockType](const FBlockSetup& obj) { return obj.BlockType == blockType; });
-    check(blockSetup != nullptr);
+    const FBlockSetup* CurrBlockSetup = BlockSetup.FindByPredicate([InBlockType](const FBlockSetup& Obj) { return Obj.BlockType == InBlockType; });
+    check(CurrBlockSetup != nullptr);
 
     return MakeShareable(new FBlockInfo
     (
-        GetUVs(blockSetup->TileTop),
-        GetUVs(blockSetup->TileSide),
-        GetUVs(blockSetup->TileBottom),
-        blockSetup->Health        
+        GetUVs(CurrBlockSetup->TileTop),
+        GetUVs(CurrBlockSetup->TileSide),
+        GetUVs(CurrBlockSetup->TileBottom),
+        CurrBlockSetup->Health        
     ));
 }
 
-TArray<FVector2D> UBlockSettings::GetUVs(ETile tile) const
+TArray<FVector2D> UBlockSettings::GetUVs(const ETile InTile) const
 {
-    const FTileSetup* tileSetup = TileSetup.FindByPredicate([tile](const FTileSetup& obj) { return obj.Tile == tile; });
-    check(tileSetup != nullptr);
+    const FTileSetup* CurrTileSetup = TileSetup.FindByPredicate([InTile](const FTileSetup& Obj) { return Obj.Tile == InTile; });
+    check(CurrTileSetup != nullptr);
 
-    FIntPoint position = tileSetup->Position;
+    const FIntPoint& Position = CurrTileSetup->Position;
 
     return TArray<FVector2D>
     {
-        FVector2D((position.X + 0.0f) / TileSize, (position.Y + 1.0f) / TileSize),
-        FVector2D((position.X + 0.0f) / TileSize, (position.Y + 0.0f) / TileSize),
-        FVector2D((position.X + 1.0f) / TileSize, (position.Y + 0.0f) / TileSize),
-        FVector2D((position.X + 1.0f) / TileSize, (position.Y + 1.0f) / TileSize),
+        FVector2D((Position.X + 0.0f) / TileSize, (Position.Y + 1.0f) / TileSize),
+        FVector2D((Position.X + 0.0f) / TileSize, (Position.Y + 0.0f) / TileSize),
+        FVector2D((Position.X + 1.0f) / TileSize, (Position.Y + 0.0f) / TileSize),
+        FVector2D((Position.X + 1.0f) / TileSize, (Position.Y + 1.0f) / TileSize),
     };
 }

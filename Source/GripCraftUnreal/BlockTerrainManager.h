@@ -81,8 +81,8 @@ private:
 	void CreateNewChunks();
 	void RemoveFarChunks();
 	ABlockTerrainChunk* CreateChunk(const FIntPoint ChunkPos);
-	FIntVector GetPositionInChunk(const FIntPoint ChunkPosition, const FVector TargetPosition) const;
-	FIntPoint GetChunkPosition(const FVector Position) const;
+	FIntVector GetPositionInChunk(const FIntPoint& ChunkPosition, const FVector& TargetPosition) const;
+	FIntPoint GetChunkPosition(const FVector& Position) const;
 	bool GetPlayerLocation(FVector& OutLocation) const;
 	void UpdateNoiseType();
 
