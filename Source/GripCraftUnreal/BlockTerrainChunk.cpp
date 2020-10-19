@@ -2,9 +2,12 @@
 
 
 #include "BlockTerrainChunk.h"
-#include "ProceduralMeshComponent.h"
-#include "FastNoiseLite.h"
+#include "Array3D.h"
+#include "BlockData.h"
+#include "BlockTerrainMeshDataTask.h"
 #include "BlockSettings.h"
+#include "FastNoiseLite.h"
+#include "ProceduralMeshComponent.h"
 #include "HAL/ThreadManager.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -29,7 +32,7 @@ void ABlockTerrainChunk::Tick(float DeltaSeconds)
 	TryFinishMeshDataTask();
 }
 
-void ABlockTerrainChunk::Initialize(int InWidth, int InHeight, /*const*/ UBlockSettings* InBlockSettings, TArray3D<FBlockData>* InBlockData)
+void ABlockTerrainChunk::Initialize(int InWidth, int InHeight, UBlockSettings* InBlockSettings, TArray3D<FBlockData>* InBlockData)
 {
 	Width = InWidth;
 	Height = InHeight;
@@ -41,12 +44,12 @@ void ABlockTerrainChunk::Initialize(int InWidth, int InHeight, /*const*/ UBlockS
 	if (InBlockData == nullptr)
 	{
 		BlockData = new TArray3D<FBlockData>(Width, Width, Height);
-		bChanged = false;
+		bHasChanged = false;
 	}
 	else
 	{
 		BlockData = InBlockData;
-		bChanged = true;
+		bHasChanged = true;
 	}
 }
 
@@ -57,45 +60,50 @@ void ABlockTerrainChunk::DeInitialize()
 	TryCancelMeshDataTask();
 }
 
-void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
+void ABlockTerrainChunk::GenerateHeightmap(int PosX, int PosY, float NoiseScale, const FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
 {
+	const auto& BlockInfoMap = *BlockSettings->GetBlockInfoMap();
+
 	for (int x = 0; x < Width; ++x)
 	{
 		for (int y = 0; y < Width; ++y)
 		{
-			int height = GetTerrainHeight(PosX + x, PosY + y, NoiseScale, NoiseOffset, NoiseLib);
+			int CurrentHeight = GetTerrainHeight(PosX + x, PosY + y, NoiseScale, NoiseOffset, NoiseLib);
 
 			for (int z = 0; z < Height; ++z)
 			{
-				EBlockType blockType = GetBlockTypeForHeight(z, height);
+				const EBlockType CurrentBlockType = GetBlockTypeForHeight(z, CurrentHeight);
+				FBlockData& CurrentBlockData = BlockData->Get(x, y, z);
 
-				BlockData->Get(x, y, z).BlockType = blockType;
+				CurrentBlockData.BlockType = CurrentBlockType;
 
-				if (blockType != EBlockType::None)
+				if (CurrentBlockType != EBlockType::None)
 				{
-					BlockData->Get(x, y, z).Health = (*BlockSettings->GetBlockInfoMap())[blockType]->Health;
+					CurrentBlockData.Health = BlockInfoMap[CurrentBlockType]->Health;
 				}
 			}
 		}
 	}
 }
 
-void ABlockTerrainChunk::SetBlock(int X, int Y, int Z, EBlockType BlockType)
+void ABlockTerrainChunk::SetBlock(int X, int Y, int Z, const EBlockType BlockType)
 {
 	if (CheckBounds(X, Y, Z) == false)
 		return;
 
-	if (BlockData->Get(X, Y, Z).BlockType != EBlockType::None)
+	FBlockData& CurrentBlockData = BlockData->Get(X, Y, Z);
+
+	if (CurrentBlockData.BlockType != EBlockType::None)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Block already occupied"));
 	}
 
-	BlockData->Get(X, Y, Z).BlockType = BlockType;
-	BlockData->Get(X, Y, Z).Health    = (*BlockSettings->GetBlockInfoMap())[BlockType]->Health;
+	CurrentBlockData.BlockType = BlockType;
+	CurrentBlockData.Health    = (*BlockSettings->GetBlockInfoMap())[BlockType]->Health;
 
 	UpdateMesh();
 
-	bChanged = true;
+	bHasChanged = true;
 }
 
 void ABlockTerrainChunk::DamageBlock(int X, int Y, int Z, float Damage)
@@ -105,24 +113,26 @@ void ABlockTerrainChunk::DamageBlock(int X, int Y, int Z, float Damage)
 	if (Z == 0)
 		return;
 
-	if (BlockData->Get(X, Y, Z).BlockType == EBlockType::None)
+	FBlockData& CurrentBlockData = BlockData->Get(X, Y, Z);
+
+	if (CurrentBlockData.BlockType == EBlockType::None)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Block already destroyed"));
 		return;
 	}
 
-	float health = BlockData->Get(X, Y, Z).Health;
-	health -= Damage;
+	float Health = CurrentBlockData.Health;
+	Health -= Damage;
 
-	if (health <= 0.0f)
+	if (Health <= 0.0f)
 	{
-		BlockData->Get(X, Y, Z).BlockType = EBlockType::None;
+		CurrentBlockData.BlockType = EBlockType::None;
 		UpdateMesh();
 	}
 
-	BlockData->Get(X, Y, Z).Health = FMath::Max(0.0f, health);
+	CurrentBlockData.Health = FMath::Max(0.0f, Health);
 
-	bChanged = true;
+	bHasChanged = true;
 }
 
 void ABlockTerrainChunk::UpdateMesh()
@@ -143,10 +153,10 @@ void ABlockTerrainChunk::UpdateMesh()
 
 TArray3D<FBlockData>* ABlockTerrainChunk::TakeBlockData()
 {
-	TArray3D<FBlockData>* data = BlockData;
+	TArray3D<FBlockData>* OutData = BlockData;
 	BlockData = nullptr;
 
-	return data;
+	return OutData;
 }
 
 void ABlockTerrainChunk::TryFinishMeshDataTask()
@@ -156,7 +166,7 @@ void ABlockTerrainChunk::TryFinishMeshDataTask()
 	if (MeshDataTask->IsDone() == false)
 		return;
 
-	const FBlockTerrainMeshDataTask CompletedTask = MeshDataTask->GetTask();
+	const FBlockTerrainMeshDataTask& CompletedTask = MeshDataTask->GetTask();
 
 	ProceduralMeshComponent->ClearMeshSection(0);
 	ProceduralMeshComponent->CreateMeshSection_LinearColor(0, CompletedTask.Vertices, CompletedTask.Triangles, CompletedTask.Normals, CompletedTask.UVs, CompletedTask.VertexColors, CompletedTask.Tangents, true);
@@ -181,17 +191,17 @@ void ABlockTerrainChunk::TryCancelMeshDataTask()
 	MeshDataTask = nullptr;
 }
 
-int ABlockTerrainChunk::GetTerrainHeight(int X, int Y, float NoiseScale, FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
+int ABlockTerrainChunk::GetTerrainHeight(int X, int Y, float NoiseScale, const FVector2D NoiseOffset, FastNoiseLite& NoiseLib) const
 {
-	float noiseCoordX = X * NoiseScale + NoiseOffset.X;
-	float noiseCoordY = Y * NoiseScale + NoiseOffset.Y;
-	float noiseSample = (NoiseLib.GetNoise(noiseCoordX, noiseCoordY) + 1.f) * 0.5f;
+	float NoiseCoordX = X * NoiseScale + NoiseOffset.X;
+	float NoiseCoordY = Y * NoiseScale + NoiseOffset.Y;
+	float NoiseSample = (NoiseLib.GetNoise(NoiseCoordX, NoiseCoordY) * 0.5f) + 0.5f;
 
-	int result = FMath::Clamp(FMath::FloorToInt(noiseSample * Height), 0, Height - 1);
+	int Result = FMath::Clamp(FMath::FloorToInt(NoiseSample * Height), 0, Height - 1);
 
-//	UE_LOG(LogTemp, Display, TEXT("X:%f Y:%f Sample:%f Result:%d"), noiseCoordX, noiseCoordY, noiseSample, result);
+//	UE_LOG(LogTemp, Display, TEXT("X:%f Y:%f Sample:%f Result:%d"), NoiseCoordX, NoiseCoordY, NoiseSample, Result);
 
-	return result;
+	return Result;
 }
 
 EBlockType ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHeight) const
@@ -199,13 +209,13 @@ EBlockType ABlockTerrainChunk::GetBlockTypeForHeight(int InHeight, int CurrMaxHe
 	if (InHeight > CurrMaxHeight)
 		return EBlockType::None;
 
-	float fraction = InHeight / static_cast<float>(Height);
+	float Fraction = InHeight / static_cast<float>(Height);
 
-	if (fraction < 0.2f)
+	if (Fraction < 0.2f)
 		return EBlockType::Stone;
-	if (fraction < 0.4f)
+	if (Fraction < 0.4f)
 		return EBlockType::Dirt;
-	if (fraction < 0.6f)
+	if (Fraction < 0.6f)
 		return EBlockType::Grass;
 
 	return EBlockType::Snow;

@@ -1,9 +1,10 @@
 ﻿#pragma once
 
 #include "Array3D.h"
-#include "BlockData.h"
 #include "BlockSettings.h"
 #include "KismetProceduralMeshLibrary.h"
+
+struct FBlockData;
 
 class FBlockTerrainMeshDataTask final : public FNonAbandonableTask
 {

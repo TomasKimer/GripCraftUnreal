@@ -4,18 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "BlockType.h"
 #include "BlockSettings.generated.h"
-
-
-UENUM()
-enum class EBlockType : uint8
-{
-	None,
-	Grass,
-	Dirt,
-	Snow,
-	Stone
-};
 
 
 UENUM()

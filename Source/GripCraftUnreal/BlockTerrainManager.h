@@ -3,12 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BlockSettings.h"
-#include "BlockTerrainChunk.h"
 #include "GameFramework/Actor.h"
+#include "Array3D.h"
+#include "BlockData.h"
+#include "BlockType.h"
 #include "FastNoiseLite.h"
 #include "BlockTerrainManager.generated.h"
 
+class ABlockTerrainChunk;
+class UBlockSettings;
 
 UENUM()
 enum class ENoiseType : uint8
@@ -21,7 +24,6 @@ enum class ENoiseType : uint8
 	Value
 };
 
-
 UCLASS()
 class GRIPCRAFTUNREAL_API ABlockTerrainManager final : public AActor
 {
@@ -31,16 +33,11 @@ public:
 	ABlockTerrainManager();
 	~ABlockTerrainManager();
 
-	virtual void Tick(float DeltaTime) override;
-
 	FVector GetOptimalPlayerSpawnLocation() const;
-	void AddBlock(FVector AddBlockPosition, EBlockType BlockType);
-	void DamageBlock(FVector HitPosition, FVector HitNormal, float Damage);
+	void AddBlock(const FVector AddBlockPosition, const EBlockType BlockType);
+	void DamageBlock(const FVector HitPosition, const FVector HitNormal, float Damage);
 
 	friend FArchive& operator<<(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager);
-
-protected:
-	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "8", ClampMax = "128"))
@@ -77,14 +74,17 @@ private:
 	FastNoiseLite NoiseLib;
 	FIntPoint PlayerChunkPosition = FIntPoint(TNumericLimits<int32>::Min(), TNumericLimits<int32>::Min());
 
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
 	void UpdateChunks();
 	void CreateNewChunks();
 	void RemoveFarChunks();
-	ABlockTerrainChunk* CreateChunk(FIntPoint ChunkPos);
-	FIntVector GetPositionInChunk(FIntPoint ChunkPosition, FVector TargetPosition) const;
-	FIntPoint GetChunkPosition(FVector Position) const;
+	ABlockTerrainChunk* CreateChunk(const FIntPoint ChunkPos);
+	FIntVector GetPositionInChunk(const FIntPoint ChunkPosition, const FVector TargetPosition) const;
+	FIntPoint GetChunkPosition(const FVector Position) const;
 	bool GetPlayerLocation(FVector& OutLocation) const;
 	void UpdateNoiseType();
 
-	static FastNoiseLite::NoiseType ConvertNoiseType(ENoiseType NoiseType);
+	static FastNoiseLite::NoiseType ConvertNoiseType(const ENoiseType NoiseType);
 };

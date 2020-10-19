@@ -1,5 +1,7 @@
 ﻿
 #include "BlockTerrainMeshDataTask.h"
+#include "BlockData.h"
+#include "BlockSettings.h"
 //#include "HAL/ThreadManager.h"
 
 void FBlockTerrainMeshDataTask::DoWork()

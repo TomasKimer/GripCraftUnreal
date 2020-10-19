@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "BlockSettings.h"
+#include "BlockType.h"
 
 struct FBlockData
 {
