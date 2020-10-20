@@ -70,13 +70,13 @@ TSharedPtr<UBlockSettings::FBlockInfo, ESPMode::ThreadSafe> UBlockSettings::Crea
     const FBlockSetup* CurrBlockSetup = BlockSetup.FindByPredicate([InBlockType](const FBlockSetup& Obj) { return Obj.BlockType == InBlockType; });
     check(CurrBlockSetup != nullptr);
 
-    return MakeShareable(new FBlockInfo
+    return MakeShared<FBlockInfo, ESPMode::ThreadSafe>
     (
         GetUVs(CurrBlockSetup->TileTop),
         GetUVs(CurrBlockSetup->TileSide),
         GetUVs(CurrBlockSetup->TileBottom),
         CurrBlockSetup->Health        
-    ));
+    );
 }
 
 TArray<FVector2D> UBlockSettings::GetUVs(const ETile InTile) const
