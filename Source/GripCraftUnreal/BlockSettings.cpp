@@ -52,15 +52,14 @@ TSharedPtr<UBlockSettings::FBlockInfoMap, ESPMode::ThreadSafe> UBlockSettings::G
     if (CachedBlockInfoMap != nullptr)
         return CachedBlockInfoMap;
 
-    FBlockInfoMap* Result = new FBlockInfoMap();
-    Result->Reserve(4);
-
-    Result->Add(EBlockType::Grass, CreateBlockInfo(EBlockType::Grass));
-    Result->Add(EBlockType::Dirt, CreateBlockInfo(EBlockType::Dirt));
-    Result->Add(EBlockType::Snow, CreateBlockInfo(EBlockType::Snow));
-    Result->Add(EBlockType::Stone, CreateBlockInfo(EBlockType::Stone));
-
-    CachedBlockInfoMap = MakeShareable(Result);
+//  CachedBlockInfoMap = MakeShared<FBlockInfoMap, ESPMode::ThreadSafe> { { .. }, .. } // [C3321] an initializer list is unexpected in this context
+    CachedBlockInfoMap = MakeShareable(new FBlockInfoMap
+    {
+        { EBlockType::Grass, CreateBlockInfo(EBlockType::Grass) },
+        { EBlockType::Dirt,  CreateBlockInfo(EBlockType::Dirt)  },
+        { EBlockType::Snow,  CreateBlockInfo(EBlockType::Snow)  },
+        { EBlockType::Stone, CreateBlockInfo(EBlockType::Stone) },
+    });
 
     return CachedBlockInfoMap;
 }
