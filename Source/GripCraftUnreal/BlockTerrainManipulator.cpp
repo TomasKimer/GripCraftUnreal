@@ -99,11 +99,11 @@ void ABlockTerrainManipulator::Update(const FVector& ViewOrigin, const FVector& 
 
 void ABlockTerrainManipulator::CreateBlock()
 {
-	const int FaceCount       = 6;
-	const int IndicesPerFace  = 6;
-	const int VerticesPerFace = 4;
-	const int VertexCount     = FaceCount * VerticesPerFace;
-	const int IndexCount      = FaceCount * IndicesPerFace;
+	static const int FaceCount       = 6;
+	static const int IndicesPerFace  = 6;
+	static const int VerticesPerFace = 4;
+	static const int VertexCount     = FaceCount * VerticesPerFace;
+	static const int IndexCount      = FaceCount * IndicesPerFace;
 
 	Vertices.Reserve(VertexCount);
 	Vertices.Append(UBlockSettings::LeftVertices);
