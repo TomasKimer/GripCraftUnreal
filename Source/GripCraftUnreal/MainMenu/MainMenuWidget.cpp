@@ -3,7 +3,6 @@
 
 #include "MainMenuWidget.h"
 #include "Components/Button.h"
-#include "GripCraftUnreal/GripCraftUnrealGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 void UMainMenuWidget::NativeConstruct()

@@ -30,6 +30,8 @@ void AGripCraftUnrealGameMode::StartPlay()
 	FVector PlayerLocation;
 	FRotator PlayerRotation;
 
+	PlayerController->SetInputMode(FInputModeGameOnly());
+
 	if (FGripCraftUnrealSaveGame::Load(*BlockTerrainManager, PlayerLocation, PlayerRotation) == true)
 	{
 		PlayerPawn->SetActorLocation(PlayerLocation);

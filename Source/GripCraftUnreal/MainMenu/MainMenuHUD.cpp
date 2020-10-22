@@ -4,6 +4,8 @@
 #include "MainMenuHUD.h"
 #include "MainMenuWidget.h"
 #include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 void AMainMenuHUD::BeginPlay()
 {
@@ -16,6 +18,8 @@ void AMainMenuHUD::BeginPlay()
 		if (MainMenuWidget != nullptr)
 		{
 			MainMenuWidget->AddToViewport();
+
+			UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(UGameplayStatics::GetPlayerController(GetWorld(), 0), MainMenuWidget, EMouseLockMode::DoNotLock);
 		}
 	}
 }
