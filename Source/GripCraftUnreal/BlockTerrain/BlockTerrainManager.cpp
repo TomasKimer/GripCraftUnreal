@@ -5,6 +5,7 @@
 #include "BlockSettings.h"
 #include "BlockTerrainChunk.h"
 #include "BlockTerrainSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 
 
 ABlockTerrainManager::ABlockTerrainManager()
@@ -212,13 +213,9 @@ FIntPoint ABlockTerrainManager::GetChunkPosition(const FVector& Position) const
 	);
 }
 
-bool ABlockTerrainManager::GetPlayerLocation(FVector& OutLocation) const  // SP only, but it's enough for now
+bool ABlockTerrainManager::GetPlayerLocation(FVector& OutLocation) const
 {
-	const APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController == nullptr)
-		return false;
-
-	APawn* PlayerPawn = PlayerController->GetPawn();
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (PlayerPawn == nullptr)
 		return false;
 
