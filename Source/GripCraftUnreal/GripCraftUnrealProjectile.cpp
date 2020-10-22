@@ -2,8 +2,8 @@
 
 #include "GripCraftUnrealProjectile.h"
 
-#include "BlockTerrainChunk.h"
-#include "BlockTerrainManager.h"
+#include "BlockTerrain/BlockTerrainChunk.h"
+#include "BlockTerrain/BlockTerrainManager.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 

@@ -11,8 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
-#include "BlockTerrainManipulator.h"
-#include "BlockTerrainSubsystem.h"
+#include "BlockTerrain/BlockTerrainManipulator.h"
+#include "BlockTerrain/BlockTerrainSubsystem.h"
 #include "GripCraftUnrealSaveGame.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);

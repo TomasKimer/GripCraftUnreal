@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BlockTerrainManager.h"
+#include "BlockTerrain/BlockTerrainManager.h"
 #include "Serialization/BufferArchive.h"
 
 class FGripCraftUnrealSaveGame
