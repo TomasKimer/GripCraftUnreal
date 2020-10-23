@@ -14,6 +14,7 @@
 #include "BlockTerrain/BlockTerrainManipulator.h"
 #include "BlockTerrain/BlockTerrainSubsystem.h"
 #include "GripCraftUnrealSaveGame.h"
+#include "InGameHUD.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -144,6 +145,7 @@ void AGripCraftUnrealCharacter::SetupPlayerInputComponent(class UInputComponent*
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AGripCraftUnrealCharacter::OnResetVR);
 	PlayerInputComponent->BindAction("QuickSave", IE_Pressed, this, &AGripCraftUnrealCharacter::OnQuickSave);
+	PlayerInputComponent->BindAction("Back", IE_Pressed, this, &AGripCraftUnrealCharacter::OnBack);
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGripCraftUnrealCharacter::MoveForward);
@@ -227,6 +229,14 @@ void AGripCraftUnrealCharacter::OnQuickSave()
 	FGripCraftUnrealSaveGame::Save(*GetWorld()->GetSubsystem<UBlockTerrainSubsystem>()->GetManager(), GetActorLocation(), Controller->GetControlRotation());
 
 	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Green, TEXT("Game Saved."));
+}
+
+void AGripCraftUnrealCharacter::OnBack()
+{
+	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	AInGameHUD* InGameHUD = Cast<AInGameHUD>(PlayerController->GetHUD());
+
+	InGameHUD->ToggleMainMenu();
 }
 
 void AGripCraftUnrealCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, const FVector Location)

@@ -5,7 +5,6 @@
 #include "MainMenuWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Kismet/GameplayStatics.h"
 
 void AMainMenuHUD::BeginPlay()
 {
@@ -19,7 +18,7 @@ void AMainMenuHUD::BeginPlay()
 		{
 			MainMenuWidget->AddToViewport();
 
-			UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(UGameplayStatics::GetPlayerController(GetWorld(), 0), MainMenuWidget, EMouseLockMode::DoNotLock);
+			UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetOwningPlayerController(), MainMenuWidget, EMouseLockMode::DoNotLock);
 		}
 	}
 }

@@ -105,6 +105,7 @@ protected:
 	void OnResetVR();
 
 	void OnQuickSave();
+	void OnBack();
 
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
