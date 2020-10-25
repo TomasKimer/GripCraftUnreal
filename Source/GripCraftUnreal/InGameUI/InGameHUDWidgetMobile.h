@@ -20,6 +20,12 @@ class GRIPCRAFTUNREAL_API UInGameHUDWidgetMobile final : public UInGameHUDWidget
 	UButton* FireButton;
 
 	UPROPERTY(meta = (BindWidget))
+	UButton* AlternateFireButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* ChangeBlockButton;
+
+	UPROPERTY(meta = (BindWidget))
 	UButton* JumpButton;
 
 	UFUNCTION()
@@ -27,6 +33,12 @@ class GRIPCRAFTUNREAL_API UInGameHUDWidgetMobile final : public UInGameHUDWidget
 
 	UFUNCTION()
 	void OnFireButtonPressed();
+
+	UFUNCTION()
+    void OnAlternateFireButtonPressed();
+
+	UFUNCTION()
+    void OnChangeBlockButtonClicked();
 
 	UFUNCTION()
 	void OnJumpButtonPressed();

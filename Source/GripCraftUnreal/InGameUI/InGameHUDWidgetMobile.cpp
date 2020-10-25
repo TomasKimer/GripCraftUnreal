@@ -11,6 +11,8 @@ void UInGameHUDWidgetMobile::NativeConstruct()
 {
 	MenuButton->OnClicked.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnMenuButtonClicked);
 	FireButton->OnPressed.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnFireButtonPressed);
+	AlternateFireButton->OnPressed.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnAlternateFireButtonPressed);
+	ChangeBlockButton->OnClicked.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnChangeBlockButtonClicked);
 	JumpButton->OnPressed.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnJumpButtonPressed);
 }
 
@@ -21,12 +23,21 @@ void UInGameHUDWidgetMobile::OnMenuButtonClicked()
 
 void UInGameHUDWidgetMobile::OnFireButtonPressed()
 {
-	AGripCraftUnrealCharacter* Character = Cast<AGripCraftUnrealCharacter>(Owner->GetOwningPawn());
-	Character->OnFire();
+	// FIXME GetOwningPlayer() == nullptr
+	Cast<AGripCraftUnrealCharacter>(Owner->GetOwningPawn())->OnFire();
+}
+
+void UInGameHUDWidgetMobile::OnAlternateFireButtonPressed()
+{
+	Cast<AGripCraftUnrealCharacter>(Owner->GetOwningPawn())->OnAlternateFire();
+}
+
+void UInGameHUDWidgetMobile::OnChangeBlockButtonClicked()
+{
+	Cast<AGripCraftUnrealCharacter>(Owner->GetOwningPawn())->OnNextWeapon();
 }
 
 void UInGameHUDWidgetMobile::OnJumpButtonPressed()
 {
-	AGripCraftUnrealCharacter* Character = Cast<AGripCraftUnrealCharacter>(Owner->GetOwningPawn());
-	Character->Jump();
+	Cast<AGripCraftUnrealCharacter>(Owner->GetOwningPawn())->Jump();
 }
