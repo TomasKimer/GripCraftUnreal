@@ -58,6 +58,7 @@ void AInGameHUD::BeginPlay()
 		HUDWidget = CreateWidget<UInGameHUDWidgetPC>(GetWorld(), HUDWidgetClassPC);
 	}
 
+	HUDWidget->SetOwner(this);
 	HUDWidget->AddToViewport();
 }
 

@@ -3,14 +3,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "InGameHUDWidget.h"
-#include "Blueprint/UserWidget.h"
 #include "InGameHUDWidgetMobile.generated.h"
 
+class UButton;
 
 UCLASS(Abstract)
 class GRIPCRAFTUNREAL_API UInGameHUDWidgetMobile final : public UInGameHUDWidget
 {
 	GENERATED_BODY()
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* MenuButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* FireButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* JumpButton;
+
+	UFUNCTION()
+    void OnMenuButtonClicked();
+
+	UFUNCTION()
+	void OnFireButtonClicked();
+
+	UFUNCTION()
+	void OnJumpButtonClicked();
+
+	virtual void NativeConstruct() override;
 };
