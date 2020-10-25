@@ -18,7 +18,7 @@ class AInGameHUD final : public AHUD
 	GENERATED_BODY()
 
 public:
-	void ToggleMainMenu();
+	void ToggleMenu();
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -39,7 +39,7 @@ private:
 	UPROPERTY()
 	UInGameMenuWidget* MenuWidget;
 
-	bool bMainMenuVisible = false;
+	bool bMenuVisible = false;
 
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;

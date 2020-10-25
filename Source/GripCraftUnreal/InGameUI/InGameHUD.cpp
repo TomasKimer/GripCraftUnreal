@@ -14,16 +14,17 @@
 #include "Kismet/GameplayStatics.h"
 
 
-void AInGameHUD::ToggleMainMenu()
+void AInGameHUD::ToggleMenu()
 {
 	if (MenuWidget == nullptr)
 	{
 		MenuWidget = CreateWidget<UInGameMenuWidget>(GetWorld(), MenuWidgetClass);
+		MenuWidget->SetOwner(this);
 	}
 
-	bMainMenuVisible = !bMainMenuVisible;
+	bMenuVisible = !bMenuVisible;
 
-	if (bMainMenuVisible == true)
+	if (bMenuVisible == true)
 	{
 		HUDWidget->RemoveFromViewport();
 		MenuWidget->AddToViewport();

@@ -236,7 +236,7 @@ void AGripCraftUnrealCharacter::OnBack()
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	AInGameHUD* InGameHUD = Cast<AInGameHUD>(PlayerController->GetHUD());
 
-	InGameHUD->ToggleMainMenu();
+	InGameHUD->ToggleMenu();
 }
 
 void AGripCraftUnrealCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, const FVector Location)

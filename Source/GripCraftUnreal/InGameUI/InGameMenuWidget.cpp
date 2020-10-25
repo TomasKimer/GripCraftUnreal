@@ -5,7 +5,6 @@
 #include "InGameHUD.h"
 #include "Components/Button.h"
 #include "GripCraftUnreal/GripCraftUnrealGameInstance.h"
-#include "Kismet/GameplayStatics.h"
 
 
 void UInGameMenuWidget::NativeConstruct()
@@ -16,10 +15,7 @@ void UInGameMenuWidget::NativeConstruct()
 
 void UInGameMenuWidget::OnResumeButtonClicked()
 {
-	// temp hack
-	const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	AInGameHUD* InGameHUD = Cast<AInGameHUD>(PlayerController->GetHUD());
-	InGameHUD->ToggleMainMenu();
+	Owner->ToggleMenu();
 }
 
 void UInGameMenuWidget::OnQuitToMenuButtonClicked()
