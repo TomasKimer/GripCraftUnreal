@@ -3,7 +3,7 @@
 
 #include "MainMenuWidget.h"
 #include "Components/Button.h"
-#include "Kismet/GameplayStatics.h"
+#include "GripCraftUnreal/GripCraftUnrealGameInstance.h"
 
 void UMainMenuWidget::NativeConstruct()
 {
@@ -13,10 +13,10 @@ void UMainMenuWidget::NativeConstruct()
 
 void UMainMenuWidget::OnPlayButtonClicked()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("GameMap"));
+	GetGameInstance<UGripCraftUnrealGameInstance>()->LoadGameLevel();
 }
 
 void UMainMenuWidget::OnQuitButtonClicked()
 {
-	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, false);
+	GetGameInstance<UGripCraftUnrealGameInstance>()->QuitGame();
 }

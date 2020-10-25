@@ -2,7 +2,7 @@
 
 
 #include "InGameHUDWidget.h"
-
+#include "GripCraftUnrealGameInstance.h"
 #include "InGameHUD.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,5 +24,5 @@ void UInGameHUDWidget::OnResumeButtonClicked()
 
 void UInGameHUDWidget::OnQuitToMenuButtonClicked()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("MainMenuMap"));
+	GetGameInstance<UGripCraftUnrealGameInstance>()->LoadMainMenuLevel();
 }
