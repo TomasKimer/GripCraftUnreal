@@ -1,20 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "InGameHUDWidget.h"
-#include "GripCraftUnrealGameInstance.h"
+#include "InGameMenuWidget.h"
 #include "InGameHUD.h"
 #include "Components/Button.h"
+#include "GripCraftUnreal/GripCraftUnrealGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
 
-void UInGameHUDWidget::NativeConstruct()
+void UInGameMenuWidget::NativeConstruct()
 {
-	ResumeButton->OnClicked.AddUniqueDynamic(this, &UInGameHUDWidget::OnResumeButtonClicked);
-	QuitToMenuButton->OnClicked.AddUniqueDynamic(this, &UInGameHUDWidget::OnQuitToMenuButtonClicked);
+	ResumeButton->OnClicked.AddUniqueDynamic(this, &UInGameMenuWidget::OnResumeButtonClicked);
+	QuitToMenuButton->OnClicked.AddUniqueDynamic(this, &UInGameMenuWidget::OnQuitToMenuButtonClicked);
 }
 
-void UInGameHUDWidget::OnResumeButtonClicked()
+void UInGameMenuWidget::OnResumeButtonClicked()
 {
 	// temp hack
 	const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -22,7 +22,7 @@ void UInGameHUDWidget::OnResumeButtonClicked()
 	InGameHUD->ToggleMainMenu();
 }
 
-void UInGameHUDWidget::OnQuitToMenuButtonClicked()
+void UInGameMenuWidget::OnQuitToMenuButtonClicked()
 {
 	GetGameInstance<UGripCraftUnrealGameInstance>()->LoadMainMenuLevel();
 }

@@ -5,25 +5,30 @@
 #include "Engine/Texture2D.h"
 #include "CanvasItem.h"
 #include "InGameHUDWidget.h"
+#include "InGameHUDWidgetPC.h"
+#include "InGameHUDWidgetMobile.h"
+#include "InGameMenuWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "GameFramework/InputSettings.h"
 #include "Kismet/GameplayStatics.h"
 
 
 void AInGameHUD::ToggleMainMenu()
 {
-	if (InGameHUDWidget == nullptr)
+	if (MenuWidget == nullptr)
 	{
-		InGameHUDWidget = CreateWidget<UInGameHUDWidget>(GetWorld(), InGameHUDWidgetClass);
+		MenuWidget = CreateWidget<UInGameMenuWidget>(GetWorld(), MenuWidgetClass);
 	}
 
 	bMainMenuVisible = !bMainMenuVisible;
 
 	if (bMainMenuVisible == true)
 	{
-		InGameHUDWidget->AddToViewport();
+		HUDWidget->RemoveFromViewport();
+		MenuWidget->AddToViewport();
 
-		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetOwningPlayerController(), InGameHUDWidget, EMouseLockMode::DoNotLock);
+		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(GetOwningPlayerController(), MenuWidget, EMouseLockMode::DoNotLock);
 		UGameplayStatics::SetGamePaused(GetWorld(), true);
 	}
 	else
@@ -31,13 +36,28 @@ void AInGameHUD::ToggleMainMenu()
 		UGameplayStatics::SetGamePaused(GetWorld(), false);
 		GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
 
-		InGameHUDWidget->RemoveFromViewport();
+		MenuWidget->RemoveFromViewport();
+		HUDWidget->AddToViewport();
 	}
 }
 
 void AInGameHUD::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// this code is taken from GripCraftUnrealCharacter.cpp template
+	// but SVirtualJoystick::ShouldDisplayTouchInterface() should be more consistent with showing virtual joysticks (e.g. in the emulator)
+	// but I'm getting "unresolved external symbol" when using it, so using the code from the template for now 
+	if (FPlatformMisc::SupportsTouchInput() || GetDefault<UInputSettings>()->bUseMouseForTouch)
+	{
+		HUDWidget = CreateWidget<UInGameHUDWidgetMobile>(GetWorld(), HUDWidgetClassMobile);
+	}
+	else
+	{
+		HUDWidget = CreateWidget<UInGameHUDWidgetPC>(GetWorld(), HUDWidgetClassPC);
+	}
+
+	HUDWidget->AddToViewport();
 }
 
 void AInGameHUD::DrawHUD()

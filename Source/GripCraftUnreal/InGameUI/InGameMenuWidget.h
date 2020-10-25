@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "InGameHUDWidget.generated.h"
+#include "InGameMenuWidget.generated.h"
 
 class UButton;
 
 UCLASS(Abstract)
-class GRIPCRAFTUNREAL_API UInGameHUDWidget final : public UUserWidget
+class GRIPCRAFTUNREAL_API UInGameMenuWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -26,5 +26,4 @@ class GRIPCRAFTUNREAL_API UInGameHUDWidget final : public UUserWidget
     void OnQuitToMenuButtonClicked();
 
 	virtual void NativeConstruct() override;
-	
 };

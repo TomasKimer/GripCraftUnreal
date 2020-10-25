@@ -7,6 +7,10 @@
 #include "InGameHUD.generated.h"
 
 class UInGameHUDWidget;
+class UInGameHUDWidgetPC;
+class UInGameHUDWidgetMobile;
+class UInGameMenuWidget;
+class UTexture2D;
 
 UCLASS(Abstract)
 class AInGameHUD final : public AHUD
@@ -16,19 +20,27 @@ class AInGameHUD final : public AHUD
 public:
 	void ToggleMainMenu();
 
-
 private:
 	UPROPERTY(EditDefaultsOnly)
-	class UTexture2D* CrosshairTex;
+	UTexture2D* CrosshairTex;
 
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
-	TSubclassOf<UInGameHUDWidget> InGameHUDWidgetClass;
+	TSubclassOf<UInGameHUDWidgetPC> HUDWidgetClassPC;
+
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UInGameHUDWidgetMobile> HUDWidgetClassMobile;
+
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UInGameMenuWidget> MenuWidgetClass;
 
 	UPROPERTY()
-	UInGameHUDWidget* InGameHUDWidget;
+	UInGameHUDWidget* HUDWidget;
+
+	UPROPERTY()
+	UInGameMenuWidget* MenuWidget;
 
 	bool bMainMenuVisible = false;
-	
+
 	virtual void BeginPlay() override;
 	virtual void DrawHUD() override;
 

@@ -14,7 +14,7 @@
 #include "BlockTerrain/BlockTerrainManipulator.h"
 #include "BlockTerrain/BlockTerrainSubsystem.h"
 #include "GripCraftUnrealSaveGame.h"
-#include "InGameHUD.h"
+#include "InGameUI/InGameHUD.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
