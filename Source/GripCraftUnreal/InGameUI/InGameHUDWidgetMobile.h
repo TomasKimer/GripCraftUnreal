@@ -26,10 +26,10 @@ class GRIPCRAFTUNREAL_API UInGameHUDWidgetMobile final : public UInGameHUDWidget
     void OnMenuButtonClicked();
 
 	UFUNCTION()
-	void OnFireButtonClicked();
+	void OnFireButtonPressed();
 
 	UFUNCTION()
-	void OnJumpButtonClicked();
+	void OnJumpButtonPressed();
 
 	virtual void NativeConstruct() override;
 };

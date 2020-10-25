@@ -10,8 +10,8 @@
 void UInGameHUDWidgetMobile::NativeConstruct()
 {
 	MenuButton->OnClicked.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnMenuButtonClicked);
-	FireButton->OnClicked.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnFireButtonClicked);
-	JumpButton->OnClicked.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnJumpButtonClicked);
+	FireButton->OnPressed.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnFireButtonPressed);
+	JumpButton->OnPressed.AddUniqueDynamic(this, &UInGameHUDWidgetMobile::OnJumpButtonPressed);
 }
 
 void UInGameHUDWidgetMobile::OnMenuButtonClicked()
@@ -19,13 +19,13 @@ void UInGameHUDWidgetMobile::OnMenuButtonClicked()
 	Owner->ToggleMenu();
 }
 
-void UInGameHUDWidgetMobile::OnFireButtonClicked()
+void UInGameHUDWidgetMobile::OnFireButtonPressed()
 {
 	AGripCraftUnrealCharacter* Character = Cast<AGripCraftUnrealCharacter>(Owner->GetOwningPawn());
 	Character->OnFire();
 }
 
-void UInGameHUDWidgetMobile::OnJumpButtonClicked()
+void UInGameHUDWidgetMobile::OnJumpButtonPressed()
 {
 	AGripCraftUnrealCharacter* Character = Cast<AGripCraftUnrealCharacter>(Owner->GetOwningPawn());
 	Character->Jump();
