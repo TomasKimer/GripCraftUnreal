@@ -27,8 +27,8 @@ AGripCraftUnrealCharacter::AGripCraftUnrealCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
 	// set our turn rates for input
-	BaseTurnRate = 45.f;
-	BaseLookUpRate = 45.f;
+	BaseTurnRate = 90.f;
+	BaseLookUpRate = 90.f;
 
 	// Create a CameraComponent	
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
@@ -245,10 +245,10 @@ void AGripCraftUnrealCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, 
 	{
 		return;
 	}
-	if ((FingerIndex == TouchItem.FingerIndex) && (TouchItem.bMoved == false))
-	{
-		OnFire();
-	}
+//	if ((FingerIndex == TouchItem.FingerIndex) && (TouchItem.bMoved == false))
+//	{
+//		OnFire();
+//	}
 	TouchItem.bIsPressed = true;
 	TouchItem.FingerIndex = FingerIndex;
 	TouchItem.Location = Location;
