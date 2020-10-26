@@ -23,6 +23,9 @@ private:
 	UButton* ResumeButton;
 
 	UPROPERTY(meta = (BindWidget))
+	UButton* SaveButton;
+	
+	UPROPERTY(meta = (BindWidget))
 	UButton* QuitToMenuButton;
 
 	UPROPERTY()
@@ -30,6 +33,9 @@ private:
 
 	UFUNCTION()
     void OnResumeButtonClicked();
+
+	UFUNCTION()
+	void OnSaveButtonClicked();
 
 	UFUNCTION()
     void OnQuitToMenuButtonClicked();
