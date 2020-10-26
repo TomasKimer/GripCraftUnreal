@@ -7,7 +7,7 @@
 #include "GripCraftUnrealGameMode.generated.h"
 
 UCLASS(minimalapi)
-class AGripCraftUnrealGameMode : public AGameModeBase
+class AGripCraftUnrealGameMode final : public AGameModeBase
 {
 	GENERATED_BODY()
 

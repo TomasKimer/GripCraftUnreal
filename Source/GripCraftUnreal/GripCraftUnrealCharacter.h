@@ -9,7 +9,7 @@
 class UInputComponent;
 
 UCLASS(config=Game)
-class AGripCraftUnrealCharacter : public ACharacter
+class AGripCraftUnrealCharacter final : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -125,9 +125,9 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
-	struct TouchData
+	struct FTouchData
 	{
-		TouchData() { bIsPressed = false;Location=FVector::ZeroVector;}
+		FTouchData() { bIsPressed = false;Location=FVector::ZeroVector;}
 		bool bIsPressed;
 		ETouchIndex::Type FingerIndex;
 		FVector Location;
@@ -136,7 +136,7 @@ protected:
 	void BeginTouch(const ETouchIndex::Type FingerIndex, const FVector Location);
 	void EndTouch(const ETouchIndex::Type FingerIndex, const FVector Location);
 	void TouchUpdate(const ETouchIndex::Type FingerIndex, const FVector Location);
-	TouchData	TouchItem;
+	FTouchData	TouchItem;
 	
 protected:
 	// APawn interface

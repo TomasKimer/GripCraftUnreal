@@ -1,11 +1,11 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GripCraftUnrealProjectile.h"
-
 #include "BlockTerrain/BlockTerrainChunk.h"
 #include "BlockTerrain/BlockTerrainManager.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+
 
 AGripCraftUnrealProjectile::AGripCraftUnrealProjectile() 
 {
@@ -47,10 +47,10 @@ void AGripCraftUnrealProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Oth
 	}
 	else if (OtherActor->IsA(ABlockTerrainChunk::StaticClass()))
 	{
-		ABlockTerrainManager* blockTerrainManager = Cast<ABlockTerrainManager>(OtherActor->GetAttachParentActor());
-		if (blockTerrainManager != nullptr)
+		ABlockTerrainManager* BlockTerrainManager = Cast<ABlockTerrainManager>(OtherActor->GetAttachParentActor());
+		if (BlockTerrainManager != nullptr)
 		{
-			blockTerrainManager->DamageBlock(Hit.ImpactPoint, Hit.Normal, Damage);
+			BlockTerrainManager->DamageBlock(Hit.ImpactPoint, Hit.Normal, Damage);
 
 			if (bDestroyOnTerrainHit)
 			{

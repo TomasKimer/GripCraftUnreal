@@ -7,7 +7,7 @@
 #include "GripCraftUnrealProjectile.generated.h"
 
 UCLASS(config=Game)
-class AGripCraftUnrealProjectile : public AActor
+class AGripCraftUnrealProjectile final : public AActor
 {
 	GENERATED_BODY()
 
