@@ -18,7 +18,7 @@ void FGripCraftUnrealSaveGame::Save(ABlockTerrainManager& BlockTerrainManager, F
 
 bool FGripCraftUnrealSaveGame::Load(ABlockTerrainManager& BlockTerrainManager, FVector& PlayerPos, FRotator& PlayerRot)
 {
-	if (UGameplayStatics::DoesSaveGameExist(DefaultSlotName, DefaultUserIndex) == false)
+	if (DoesSaveGameExist() == false)
 		return false;
 
 	TArray<uint8> DataArray;
@@ -28,6 +28,11 @@ bool FGripCraftUnrealSaveGame::Load(ABlockTerrainManager& BlockTerrainManager, F
 	SaveLoad(Reader, BlockTerrainManager, PlayerPos, PlayerRot);
 
 	return true;
+}
+
+bool FGripCraftUnrealSaveGame::DoesSaveGameExist()
+{
+	return UGameplayStatics::DoesSaveGameExist(DefaultSlotName, DefaultUserIndex);
 }
 
 void FGripCraftUnrealSaveGame::SaveLoad(FArchive& Ar, ABlockTerrainManager& BlockTerrainManager, FVector& PlayerPos, FRotator& PlayerRot)

@@ -4,6 +4,7 @@
 #include "BlockTerrain/BlockTerrainManager.h"
 #include "BlockTerrain/BlockTerrainSubsystem.h"
 #include "EngineUtils.h"
+#include "GripCraftUnrealGameInstance.h"
 #include "GripCraftUnrealSaveGame.h"
 
 
@@ -24,7 +25,8 @@ void AGripCraftUnrealGameMode::StartPlay()
 
 	PlayerController->SetInputMode(FInputModeGameOnly());
 
-	if (FGripCraftUnrealSaveGame::Load(*BlockTerrainManager, PlayerLocation, PlayerRotation) == true)
+	const bool bShouldLoadFromSave = GetGameInstance<UGripCraftUnrealGameInstance>()->ShouldLoadGameLevelFromSave();
+	if (bShouldLoadFromSave && FGripCraftUnrealSaveGame::Load(*BlockTerrainManager, PlayerLocation, PlayerRotation))
 	{
 		PlayerPawn->SetActorLocation(PlayerLocation);
 		PlayerController->SetControlRotation(PlayerRotation);

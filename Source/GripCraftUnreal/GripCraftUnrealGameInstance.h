@@ -12,7 +12,12 @@ class GRIPCRAFTUNREAL_API UGripCraftUnrealGameInstance final : public UGameInsta
 	GENERATED_BODY()
 
 public:
-	void LoadGameLevel() const;
+	void LoadGameLevel(bool bFromSave = false);
 	void LoadMainMenuLevel() const;
 	void QuitGame() const;
+
+	FORCEINLINE bool ShouldLoadGameLevelFromSave() const { return bLoadGameLevelFromSave; }
+
+private:
+	bool bLoadGameLevelFromSave = false;
 };

@@ -17,10 +17,16 @@ class GRIPCRAFTUNREAL_API UMainMenuWidget final : public UUserWidget
 	UButton* PlayButton;
 
 	UPROPERTY(meta = (BindWidget))
+	UButton* LoadButton;
+
+	UPROPERTY(meta = (BindWidget))
 	UButton* QuitButton;
 
 	UFUNCTION()
 	void OnPlayButtonClicked();
+
+	UFUNCTION()
+    void OnLoadButtonClicked();
 
 	UFUNCTION()
 	void OnQuitButtonClicked();

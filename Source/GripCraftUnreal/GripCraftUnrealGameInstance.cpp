@@ -2,11 +2,13 @@
 
 
 #include "GripCraftUnrealGameInstance.h"
-
 #include "Kismet/GameplayStatics.h"
 
-void UGripCraftUnrealGameInstance::LoadGameLevel() const
+
+void UGripCraftUnrealGameInstance::LoadGameLevel(bool bFromSave)
 {
+	bLoadGameLevelFromSave = bFromSave;
+
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("/Game/Maps/GameMap"));
 }
 
